@@ -1,746 +1,2659 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="rise">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión Hospitalaria</title>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5CC8A1">
+<title>RISE — Gestión Hospitalaria</title>
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6;
-        }
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
 
-        h1.main-title {
-            color: #0056b3;
-            font-size: 28px;
-            margin-bottom: 20px;
-            padding-left: 20px;
-        }
+<style>
+/* =========================================================
+   1 TOKENS
+   ========================================================= */
+:root{
+  --paper:#EDEDE6;
+  --paper-2:#F7F7F3;
+  --ink:#111111;
+  --cobalt:#1F4BFF;
+  --riso-red:#FF4B3E;
+  --riso-orange:#FF7A00;
+  --lime:#D8F53A;
+  --mint:#4FD1B0;
+  --forest:#3E8E2F;
+  --lilac:#C9A7FF;
+  --pink:#FF5FB0;
+  --yellow:#FFE83A;
+  --violet:#6B4BFF;
 
-        .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  --bg:var(--paper);
+  --surface:rgba(247,247,243,.88);
+  --surface-solid:var(--paper-2);
+  --text:var(--ink);
+  --accent:var(--mint);
+  --accent-2:var(--lime);
+  --accent-3:var(--cobalt);
+  --danger:var(--riso-red);
 
-        .left-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+  --grain:.18;
+  --grain-size:180px;
+  --anim-speed:1;
+  --radius:28px;
+  --shadow:6px 7px 0 rgba(17,17,17,.9);
+  --soft-shadow:0 22px 70px rgba(17,17,17,.12);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-in:cubic-bezier(.7,0,.84,0);
+}
 
-        .right-column {
-            width: 380px;
-        }
+/* =========================================================
+   2 BASE
+   ========================================================= */
+*{box-sizing:border-box}
+html{scroll-behavior:auto;background:var(--bg)}
+body{
+  margin:0;
+  min-height:100vh;
+  padding:clamp(12px,2vw,28px);
+  font-family:"Space Grotesk",system-ui,Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 15% 5%, rgba(79,209,176,.30), transparent 27%),
+    radial-gradient(circle at 90% 18%, rgba(216,245,58,.25), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(201,167,255,.18), transparent 32%),
+    var(--bg);
+  overflow-x:hidden;
+}
+button,input,textarea,select{font:inherit}
+button,a,input,textarea,select{outline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:3px solid var(--cobalt);
+  outline-offset:4px;
+}
+button{cursor:pointer}
+::selection{background:var(--ink);color:var(--lime)}
 
-        .panel {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: 1px solid #e0e0e0;
-        }
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
+  background:radial-gradient(circle at 50% 40%,transparent 40%,rgba(17,17,17,.08) 150%);
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.055;
+  background-image:
+    radial-gradient(circle,var(--ink) 1px,transparent 1.5px);
+  background-size:6px 6px;
+  mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
 
-        .panel h2, .panel h3 {
-            margin-top: 0;
-            color: #333;
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
+/* =========================================================
+   3 TEXTURA
+   ========================================================= */
+.grain{
+  position:fixed;
+  inset:-20%;
+  width:140%;
+  height:140%;
+  pointer-events:none;
+  z-index:9998;
+  opacity:var(--grain);
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  background-size:var(--grain-size) var(--grain-size);
+  animation:grainShift .7s steps(6) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate3d(0,0,0)}
+  20%{transform:translate3d(-2%,1%,0)}
+  40%{transform:translate3d(1%,-2%,0)}
+  60%{transform:translate3d(2%,2%,0)}
+  80%{transform:translate3d(-1%,-1%,0)}
+  100%{transform:translate3d(0,0,0)}
+}
+.halftone{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.13;
+  background-image:radial-gradient(circle,var(--ink) 1px,transparent 1.5px);
+  background-size:6px 6px;
+  mask-image:linear-gradient(135deg,black,transparent 70%);
+}
+.paper-edge{
+  height:28px;
+  margin:0 -2vw;
+  clip-path:polygon(0 20%,3% 52%,6% 30%,9% 65%,12% 38%,15% 70%,18% 34%,21% 58%,24% 27%,27% 63%,30% 42%,33% 72%,36% 33%,39% 57%,42% 25%,45% 66%,48% 39%,51% 70%,54% 32%,57% 55%,60% 24%,63% 65%,66% 35%,69% 68%,72% 28%,75% 57%,78% 36%,81% 72%,84% 29%,87% 61%,90% 39%,93% 70%,96% 34%,100% 56%,100% 100%,0 100%);
+  background:var(--ink);
+  opacity:.92;
+}
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+/* =========================================================
+   4 LAYOUT
+   ========================================================= */
+.page-shell{max-width:1500px;margin:0 auto;position:relative}
+.main-title{
+  position:relative;
+  margin:0 0 clamp(28px,5vw,64px);
+  min-height:min(58vh,650px);
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+  border-radius:clamp(24px,4vw,48px);
+  background:var(--ink);
+  box-shadow:var(--shadow);
+  isolation:isolate;
+  padding:clamp(28px,6vw,82px);
+}
+.main-title::before{
+  content:"";
+  position:absolute;
+  inset:-20%;
+  background:
+    radial-gradient(circle at 18% 28%,rgba(79,209,176,.95),transparent 26%),
+    radial-gradient(circle at 78% 15%,rgba(216,245,58,.9),transparent 23%),
+    radial-gradient(circle at 72% 76%,rgba(107,75,255,.82),transparent 25%),
+    radial-gradient(circle at 30% 85%,rgba(255,95,176,.75),transparent 20%);
+  filter:blur(30px);
+  z-index:0;
+  animation:meshFloat 18s var(--ease-out) infinite alternate;
+  z-index:-2;
+}
+.main-title::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,rgba(17,17,17,.18),transparent 45%,rgba(255,255,255,.08));
+  z-index:-1;
+}
+@keyframes meshFloat{
+  from{transform:translate3d(-2%,1%,0) scale(1)}
+  to{transform:translate3d(3%,-2%,0) scale(1.08)}
+}
+.hero-copy{position:relative;z-index:4;max-width:1100px}
+.hero-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+  color:var(--lime);
+  font:500 clamp(10px,1vw,12px)/1 "DM Mono",monospace;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.hero-kicker::before{
+  content:"";
+  width:34px;height:2px;background:var(--lime);
+}
+.main-title h1{
+  margin:0;
+  color:#fff;
+  font-family:"Unbounded",system-ui,sans-serif;
+  font-size:clamp(3.2rem,10vw,9.8rem);
+  line-height:.82;
+  letter-spacing:-.055em;
+  max-width:1050px;
+}
+.main-title .hero-title-text{
+  display:block;
+  color:#fff;
+  font-family:"Unbounded",system-ui,sans-serif;
+  font-size:clamp(3.2rem,10vw,9.8rem);
+  line-height:.82;
+  letter-spacing:-.055em;
+}
+.main-title .hero-title-text .outline{
+  color:transparent;
+  -webkit-text-stroke:2px #fff;
+}
+.hero-sub{
+  margin:26px 0 0;
+  max-width:700px;
+  color:rgba(255,255,255,.85);
+  font-size:clamp(14px,1.5vw,18px);
+  line-height:1.5;
+}
+.ribbon-wrap{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  opacity:.88;
+}
+.ribbon-svg{width:100%;height:100%;overflow:visible}
+.ribbon-path{
+  fill:none;
+  stroke:url(#heroRainbow);
+  stroke-width:clamp(65px,8vw,135px);
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 15px 18px rgba(17,17,17,.18));
+  opacity:.86;
+}
+.ribbon-path-under{
+  fill:none;
+  stroke:rgba(255,255,255,.13);
+  stroke-width:clamp(82px,9vw,150px);
+  stroke-linecap:round;
+}
+.ribbon-text{
+  fill:rgba(255,255,255,.72);
+  font:500 12px "DM Mono",monospace;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-            font-size: 14px;
-        }
+.container{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,380px);
+  gap:clamp(18px,3vw,32px);
+  max-width:1300px;
+  margin:0 auto;
+}
+.left-column{display:flex;flex-direction:column;gap:clamp(18px,2.5vw,28px)}
+.right-column{min-width:0}
 
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
+/* =========================================================
+   5 COMPONENTES
+   ========================================================= */
+.panel{
+  position:relative;
+  overflow:hidden;
+  padding:clamp(20px,3vw,32px);
+  border-radius:var(--radius);
+  background:var(--surface);
+  border:2px solid rgba(17,17,17,.92);
+  box-shadow:var(--soft-shadow);
+  backdrop-filter:blur(16px);
+  transform:translateZ(0);
+}
+.panel::before{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;
+  right:-85px;top:-95px;
+  border-radius:50%;
+  background:var(--accent-2);
+  opacity:.24;
+  filter:blur(8px);
+}
+.panel::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:5px;
+  background:linear-gradient(90deg,var(--mint),var(--lime),var(--violet),var(--pink));
+  opacity:.75;
+}
+.panel h2,.panel h3{
+  position:relative;
+  z-index:2;
+  margin:0 0 16px;
+  color:var(--ink);
+  font-family:"Anton","Arial Black",sans-serif;
+  font-size:clamp(1.35rem,2.5vw,2rem);
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:.01em;
+}
+.panel p{position:relative;z-index:2}
+.form-group{margin-bottom:15px;position:relative;z-index:2}
+.form-group label{
+  display:block;
+  margin-bottom:7px;
+  color:#333;
+  font:500 11px/1.2 "DM Mono",monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;
+  padding:13px 14px;
+  border:2px solid rgba(17,17,17,.78);
+  border-radius:14px;
+  background:rgba(255,255,255,.72);
+  color:var(--ink);
+  font-size:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  transition:transform .2s var(--ease-out),border-color .2s var(--ease-out),box-shadow .2s var(--ease-out);
+}
+.form-group input:hover,.form-group textarea:hover,.form-group select:hover{transform:translateY(-1px)}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+  border-color:var(--cobalt);
+  box-shadow:0 0 0 4px rgba(31,75,255,.12);
+}
+.btn-blue{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  width:100%;
+  min-height:48px;
+  padding:13px 18px;
+  border:2px solid var(--ink);
+  border-radius:999px;
+  background:var(--ink);
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+  text-decoration:none;
+  display:block;
+  text-align:center;
+  box-shadow:4px 5px 0 var(--accent);
+  transition:transform .22s var(--ease-out),box-shadow .22s var(--ease-out),background .22s var(--ease-out);
+}
+.btn-blue::before{
+  content:"";
+  position:absolute;
+  left:50%;bottom:-100%;
+  width:150%;aspect-ratio:1;
+  transform:translateX(-50%) scale(.25);
+  border-radius:50%;
+  background:var(--lime);
+  z-index:-1;
+  transition:transform .55s var(--ease-out),bottom .55s var(--ease-out);
+}
+.btn-blue:hover{
+  color:var(--ink);
+  transform:translate(-2px,-2px);
+  box-shadow:7px 8px 0 var(--ink);
+}
+.btn-blue:hover::before{bottom:-48%;transform:translateX(-50%) scale(1)}
+.btn-blue:active{transform:translate(2px,2px);box-shadow:2px 3px 0 var(--ink)}
+.btn-blue[style*="6c757d"]{background:#3b3b3b!important;box-shadow:4px 5px 0 var(--riso-red)}
+.btn-blue[style*="6c757d"]::before{background:var(--pink)}
 
-        .btn-blue {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-        }
+.doctor-panel{text-align:left;height:100%;display:flex;flex-direction:column;justify-content:space-between}
+.doctor-art{
+  position:relative;
+  min-height:280px;
+  margin:-8px -8px 24px;
+  border:2px solid var(--ink);
+  border-radius:24px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 30% 28%,var(--mint),transparent 28%),
+    radial-gradient(circle at 74% 64%,var(--lime),transparent 32%),
+    linear-gradient(135deg,#dff9ef,#f7f7f3);
+}
+.doctor-art::before{
+  content:"";
+  position:absolute;
+  width:220px;height:220px;
+  border-radius:50%;
+  left:50%;top:45%;
+  transform:translate(-50%,-50%);
+  background:rgba(255,255,255,.7);
+  box-shadow:0 0 0 16px rgba(31,75,255,.10),0 0 0 32px rgba(255,75,62,.08);
+}
+.doctor-art svg{position:absolute;inset:0;width:100%;height:100%}
+.doctor-art .pulse{
+  transform-origin:center;
+  animation:pulse 2.8s ease-in-out infinite;
+}
+@keyframes pulse{50%{transform:scale(1.035);opacity:.82}}
+.services-list{
+  text-align:left;
+  list-style:none;
+  padding:0;
+  margin:0 0 20px;
+  color:#333;
+  line-height:1.6;
+}
+.services-list li{
+  position:relative;
+  padding:10px 0 10px 27px;
+  border-bottom:1px dashed rgba(17,17,17,.2);
+}
+.services-list li::before{
+  content:"";
+  position:absolute;
+  left:0;top:17px;
+  width:11px;height:11px;
+  border-radius:4px;
+  background:var(--mint);
+  border:2px solid var(--ink);
+  transform:rotate(8deg);
+}
+.services-list li:nth-child(2)::before{background:var(--lime)}
+.services-list li:nth-child(3)::before{background:var(--violet)}
+.services-list li:nth-child(4)::before{background:var(--pink)}
 
-        .btn-blue:hover {
-            background-color: #0056b3;
-        }
+.rol-section{
+  margin-top:14px;
+  padding:16px;
+  border-radius:20px;
+  background:rgba(255,255,255,.65);
+  border:2px solid rgba(17,17,17,.65);
+  position:relative;
+  overflow:hidden;
+}
+.rol-section::before{
+  content:"";
+  position:absolute;
+  width:70px;height:70px;
+  right:-28px;top:-28px;
+  border-radius:50%;
+  background:var(--mint);
+  opacity:.35;
+}
+.rol-section h3{
+  font-family:"DM Mono",monospace;
+  font-size:12px;
+  letter-spacing:.12em;
+  border-bottom:2px solid rgba(17,17,17,.2);
+  padding-bottom:9px;
+  margin-bottom:8px;
+}
+.rol-list{list-style:none;padding:0;margin:0}
+.rol-list li{
+  padding:9px 0;
+  border-bottom:1px dashed rgba(17,17,17,.16);
+  font-size:14px;
+}
+.rol-list li:last-child{border-bottom:none}
+.empty-role{font-size:13px;color:#777;font-style:italic}
 
-        .btn-toggle {
-            transition: background-color 0.3s;
-        }
+.badge-selected{
+  position:relative;
+  z-index:2;
+  background:var(--lime);
+  color:var(--ink);
+  padding:8px 13px;
+  border:2px solid var(--ink);
+  border-radius:999px;
+  display:inline-block;
+  font:700 12px "DM Mono",monospace;
+  letter-spacing:.05em;
+  margin-bottom:15px;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.grid-citas{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:14px;
+  margin-top:15px;
+}
+.card-cita{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#f8fff8,#eefcf6);
+  border:2px solid var(--ink);
+  border-left:7px solid var(--mint);
+  padding:15px;
+  border-radius:20px;
+  font-size:13px;
+  box-shadow:4px 5px 0 rgba(17,17,17,.85);
+  transition:transform .3s var(--ease-out);
+}
+.card-cita:hover{transform:translateY(-5px) rotate(-.5deg)}
+.card-cita strong{color:var(--forest)}
+.badge-cita{
+  background:var(--forest);
+  color:white;
+  padding:4px 8px;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  font:500 10px "DM Mono",monospace;
+  letter-spacing:.05em;
+  float:right;
+}
 
-        .doctor-panel {
-            text-align: center;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+/* Modal */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  width:100%;height:100%;
+  background:rgba(17,17,17,.68);
+  backdrop-filter:blur(10px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  padding:16px;
+}
+.modal-content{
+  width:100%;
+  max-width:500px;
+  max-height:min(90vh,800px);
+  overflow:auto;
+  background:var(--paper-2);
+  padding:clamp(20px,4vw,30px);
+  border:2px solid var(--ink);
+  border-radius:28px;
+  box-shadow:12px 14px 0 var(--ink);
+  position:relative;
+}
+.close-btn{
+  position:absolute;
+  top:13px;right:17px;
+  width:38px;height:38px;
+  display:grid;place-items:center;
+  border:2px solid var(--ink);
+  border-radius:50%;
+  background:var(--pink);
+  font-size:24px;
+  cursor:pointer;
+  color:var(--ink);
+  font-weight:bold;
+  line-height:1;
+  transition:transform .2s var(--ease-out);
+}
+.close-btn:hover{transform:rotate(8deg) scale(1.05)}
+.role-buttons-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:15px;
+}
+.btn-role{
+  min-height:52px;
+  padding:12px;
+  background:var(--paper);
+  border:2px solid var(--ink);
+  border-radius:16px;
+  font-size:15px;
+  font-weight:700;
+  color:var(--ink);
+  cursor:pointer;
+  box-shadow:4px 4px 0 var(--ink);
+  transition:transform .22s var(--ease-out),background .22s var(--ease-out);
+}
+.btn-role:nth-child(1):hover{background:var(--mint)}
+.btn-role:nth-child(2):hover{background:var(--lime)}
+.btn-role:nth-child(3):hover{background:var(--riso-red)}
+.btn-role:nth-child(4):hover{background:var(--lilac)}
+.btn-role:hover{transform:translate(-2px,-2px)}
+.btn-role:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
 
-        .doctor-panel img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: block;
-        }
+/* Decorative draggable stickers */
+.sticker{
+  position:fixed;
+  z-index:30;
+  min-width:84px;
+  padding:10px 13px;
+  border:2px solid var(--ink);
+  border-radius:999px;
+  background:var(--lime);
+  color:var(--ink);
+  box-shadow:4px 5px 0 var(--ink);
+  font:700 10px "DM Mono",monospace;
+  letter-spacing:.07em;
+  user-select:none;
+  touch-action:none;
+  transform:rotate(-7deg);
+}
+.sticker.s2{background:var(--pink);transform:rotate(6deg)}
+.sticker.s3{background:var(--yellow);transform:rotate(-4deg)}
+.sticker.s4{background:var(--lilac);transform:rotate(8deg)}
+.sticker[data-draggable="true"]{cursor:grab}
+.sticker.dragging{cursor:grabbing;z-index:50;box-shadow:8px 9px 0 var(--ink)}
 
-        .doctor-panel h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-        }
+/* Mixer */
+.mixer{
+  position:fixed;
+  right:18px;bottom:18px;
+  z-index:10000;
+  width:min(310px,calc(100vw - 36px));
+  padding:13px;
+  border:2px solid var(--ink);
+  border-radius:22px;
+  background:rgba(247,247,243,.94);
+  box-shadow:7px 8px 0 var(--ink);
+  backdrop-filter:blur(16px);
+}
+.mixer-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mixer-title{font:500 10px "DM Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+.mixer-toggle{
+  width:40px;height:40px;border:2px solid var(--ink);border-radius:50%;
+  background:var(--lime);font-weight:900;
+}
+.mixer-body{display:none;padding-top:12px}
+.mixer.open .mixer-body{display:block}
+.theme-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.theme-btn{
+  border:2px solid var(--ink);
+  border-radius:12px;
+  padding:9px 6px;
+  background:var(--paper);
+  font:500 10px "DM Mono",monospace;
+  text-transform:uppercase;
+}
+.theme-btn[data-theme-btn="organic"]{background:var(--mint)}
+.theme-btn[data-theme-btn="riso"]{background:var(--riso-red)}
+.theme-btn[data-theme-btn="sticker"]{background:var(--riso-orange)}
+.grain-row{margin-top:12px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px}
+.grain-row label,.grain-value{font:500 9px "DM Mono",monospace;text-transform:uppercase}
+input[type="range"]{accent-color:var(--forest);width:100%}
 
-        .services-list {
-            text-align: left;
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 20px;
-            color: #555;
-            line-height: 1.6;
-        }
+/* Cursor */
+.custom-cursor{
+  position:fixed;
+  left:0;top:0;
+  width:18px;height:18px;
+  margin:-9px 0 0 -9px;
+  border:2px solid #fff;
+  border-radius:50%;
+  mix-blend-mode:difference;
+  pointer-events:none;
+  z-index:10001;
+  opacity:0;
+  transform:scale(1);
+  transition:width .2s,height .2s,margin .2s,transform .2s,opacity .2s;
+}
+.custom-cursor.active{opacity:1}
+.custom-cursor.big{transform:scale(3.2)}
+.cursor-label{
+  position:absolute;
+  top:28px;left:28px;
+  white-space:nowrap;
+  font:500 9px "DM Mono",monospace;
+  letter-spacing:.1em;
+  color:#fff;
+  mix-blend-mode:difference;
+}
 
-        .services-list li::before {
-            content: "• ";
-            color: #007bff;
-            font-weight: bold;
-        }
+/* Progress ribbon */
+.progress-ribbon{
+  position:fixed;
+  left:7px;top:18%;
+  width:8px;height:64vh;
+  border-radius:999px;
+  background:rgba(17,17,17,.12);
+  z-index:999;
+  overflow:hidden;
+}
+.progress-ribbon span{
+  display:block;width:100%;height:100%;
+  transform:scaleY(0);transform-origin:top;
+  background:linear-gradient(to bottom,var(--mint),var(--lime),var(--violet),var(--pink));
+  border-radius:inherit;
+}
 
-        .rol-section {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 6px;
-            background-color: #fafafa;
-            border: 1px solid #eaeaea;
-        }
+/* Ink stamps */
+.ink-stamp{
+  position:fixed;
+  z-index:9997;
+  width:90px;height:90px;
+  pointer-events:none;
+  opacity:0;
+  animation:stampIn .2s var(--ease-out) forwards,stampOut 2.3s ease 0.2s forwards;
+}
+@keyframes stampIn{from{opacity:0;transform:scale(.25) rotate(-30deg)}to{opacity:.28;transform:scale(1) rotate(var(--rot))}}
+@keyframes stampOut{to{opacity:0;transform:scale(1.3) rotate(var(--rot))}}
 
-        .rol-section h3 {
-            font-size: 16px;
-            margin: 0 0 10px 0;
-            color: #0056b3;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 5px;
-        }
+/* Confetti */
+.confetti-piece{
+  position:fixed;
+  width:8px;height:12px;
+  pointer-events:none;
+  z-index:10002;
+  border:1px solid var(--ink);
+}
 
-        .rol-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+/* Loader */
+.loader{
+  position:fixed;inset:0;
+  z-index:20000;
+  display:grid;place-items:center;
+  background:var(--paper);
+  overflow:hidden;
+}
+.loader.done{pointer-events:none}
+.loader-core{text-align:center;position:relative}
+.loader-blobs{height:150px;width:250px;position:relative;filter:url(#gooey)}
+.loader-blob{position:absolute;width:90px;height:90px;border-radius:50%;background:var(--mint);animation:loaderFloat 1.4s ease-in-out infinite alternate}
+.loader-blob:nth-child(1){left:25px;top:30px;background:var(--mint)}
+.loader-blob:nth-child(2){left:85px;top:45px;background:var(--lime);animation-delay:-.35s}
+.loader-blob:nth-child(3){left:145px;top:25px;background:var(--violet);animation-delay:-.7s}
+@keyframes loaderFloat{to{transform:translateY(-22px) scale(1.1)}}
+.loader-count{font:900 clamp(3rem,12vw,7rem)/.8 "Anton",sans-serif;letter-spacing:-.03em}
+.loader-label{font:500 10px "DM Mono",monospace;letter-spacing:.16em;text-transform:uppercase}
 
-        .rol-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
+/* =========================================================
+   6 ANIMACIONES
+   ========================================================= */
+.reveal{opacity:0;transform:translateY(28px)}
+.char-wrap{display:inline-block;overflow:hidden;vertical-align:bottom}
+.char{display:inline-block;transform:translateY(110%) rotate(5deg);opacity:0}
+.print-in{opacity:0;transform:translateY(18px)}
+.magnetic{will-change:transform}
 
-        .rol-list li:last-child {
-            border-bottom: none;
-        }
+/* =========================================================
+   7 TEMAS
+   ========================================================= */
+html[data-theme="organic"]{
+  --bg:var(--paper);
+  --surface:rgba(247,247,243,.88);
+  --accent:var(--mint);
+  --accent-2:var(--lime);
+  --accent-3:var(--cobalt);
+}
+html[data-theme="riso"]{
+  --bg:#E8E2D6;
+  --surface:rgba(247,240,226,.90);
+  --accent:var(--cobalt);
+  --accent-2:var(--riso-red);
+  --accent-3:var(--riso-orange);
+}
+html[data-theme="riso"] body{
+  background:
+    radial-gradient(circle at 10% 10%,rgba(31,75,255,.18),transparent 25%),
+    radial-gradient(circle at 90% 20%,rgba(255,75,62,.18),transparent 25%),
+    #E8E2D6;
+}
+html[data-theme="riso"] .panel{box-shadow:6px 7px 0 rgba(31,75,255,.28)}
+html[data-theme="riso"] .panel::after{background:linear-gradient(90deg,var(--cobalt),var(--riso-red),var(--riso-orange))}
+html[data-theme="sticker"]{
+  --bg:#FF7A00;
+  --surface:rgba(237,237,230,.94);
+  --accent:var(--pink);
+  --accent-2:var(--yellow);
+  --accent-3:var(--violet);
+}
+html[data-theme="sticker"] body{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(255,232,58,.55),transparent 22%),
+    radial-gradient(circle at 88% 16%,rgba(255,95,176,.38),transparent 23%),
+    var(--bg);
+}
+html[data-theme="sticker"] .main-title{background:#111;box-shadow:8px 9px 0 var(--yellow)}
+html[data-theme="sticker"] .panel{box-shadow:7px 8px 0 #111}
+html[data-theme="sticker"] .btn-blue{box-shadow:4px 5px 0 var(--pink)}
 
-        .empty-role {
-            font-size: 13px;
-            color: #888;
-            font-style: italic;
-        }
+/* =========================================================
+   8 RESPONSIVE
+   ========================================================= */
+@media (max-width:900px){
+  body{padding:12px}
+  .container{grid-template-columns:1fr}
+  .right-column{width:auto}
+  .doctor-panel{min-height:auto}
+  .sticker{display:none}
+  .main-title{min-height:58vh}
+}
+@media (max-width:600px){
+  .main-title{
+    min-height:520px;
+    align-items:flex-end;
+    padding:24px;
+    border-radius:28px;
+  }
+  .main-title h1{font-size:clamp(3rem,15vw,5.8rem)}
+  .hero-sub{font-size:14px}
+  .ribbon-path{stroke-width:72px}
+  .ribbon-text{font-size:9px}
+  .role-buttons-grid{grid-template-columns:1fr}
+  .grid-citas{grid-template-columns:1fr}
+  .modal-content{border-radius:22px;box-shadow:7px 8px 0 var(--ink)}
+  .mixer{right:10px;bottom:10px}
+  .progress-ribbon{left:3px}
+}
+@media (max-width:380px){
+  body{padding:8px}
+  .main-title{min-height:500px;padding:20px;border-radius:22px}
+  .panel{padding:18px}
+  .main-title h1{font-size:2.85rem}
+  .mixer{width:calc(100vw - 20px)}
+}
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+/* =========================================================
+   9 REDUCED MOTION
+   ========================================================= */
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after{
+  animation-duration:.001ms!important;
+  animation-iteration-count:1!important;
+  scroll-behavior:auto!important;
+  transition-duration:.001ms!important;
+}
+html.reduced-motion .reveal,
+html.reduced-motion .print-in,
+html.reduced-motion .char{
+  opacity:1!important;
+  transform:none!important;
+}
+html.reduced-motion .grain{animation:none!important}
 
-        .modal-content {
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
 
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 22px;
-            cursor: pointer;
-            color: #aaa;
-            font-weight: bold;
-        }
+/* =========================================================
+   RISE ART DIRECTION OVERRIDE — clean / human / botanical
+   ========================================================= */
+:root{
+  --rise-mint:#5CC8A1;
+  --rise-mint-dark:#287C62;
+  --rise-mint-soft:#E8F7F0;
+  --rise-ink:#17322A;
+  --rise-grey:#66736D;
+  --rise-line:#DCE8E2;
+  --rise-white:#FFFFFF;
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --text:var(--rise-ink);
+  --accent:var(--rise-mint);
+  --accent-2:#BEEBDD;
+  --accent-3:var(--rise-mint-dark);
+  --grain:.045;
+  --radius:24px;
+  --shadow:0 18px 55px rgba(25,62,49,.08);
+  --soft-shadow:0 24px 80px rgba(25,62,49,.09);
+}
+html[data-theme="rise"]{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --accent:var(--rise-mint);
+  --accent-2:#BEEBDD;
+  --accent-3:var(--rise-mint-dark);
+}
+html[data-theme="rise"] body{
+  background:#fff;
+  color:var(--rise-ink);
+}
+html[data-theme="rise"] body::before{
+  background:radial-gradient(circle at 50% 18%,rgba(92,200,161,.06),transparent 34%);
+}
+html[data-theme="rise"] body::after{opacity:.018}
+html[data-theme="rise"] .grain{opacity:var(--grain);mix-blend-mode:multiply}
+html[data-theme="rise"] .progress-ribbon{opacity:.65}
+html[data-theme="rise"] .progress-ribbon span{background:var(--rise-mint)}
 
-        .close-btn:hover {
-            color: #000;
-        }
+/* Hero */
+.main-title{
+  min-height:min(72vh,760px);
+  background:#fff;
+  border:1px solid var(--rise-line);
+  box-shadow:var(--soft-shadow);
+  border-radius:34px;
+  padding:clamp(28px,6vw,78px);
+  overflow:hidden;
+}
+.main-title::before{
+  inset:auto -10% -28% 35%;
+  width:70%;height:65%;
+  background:radial-gradient(circle,rgba(92,200,161,.17),rgba(92,200,161,.06) 34%,transparent 70%);
+  filter:blur(18px);
+  animation:riseGlow 16s ease-in-out infinite alternate;
+}
+.main-title::after{
+  background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.76) 46%,rgba(255,255,255,.16) 100%);
+}
+@keyframes riseGlow{from{transform:translate3d(-2%,2%,0) scale(.95)}to{transform:translate3d(4%,-3%,0) scale(1.08)}}
+.hero-copy{max-width:960px}
+.hero-kicker{color:var(--rise-mint-dark);margin-bottom:22px}
+.hero-kicker::before{background:var(--rise-mint)}
+.main-title .hero-title-text{
+  color:var(--rise-ink);
+  font-family:"Unbounded",system-ui,sans-serif;
+  font-size:clamp(3.5rem,10.8vw,10rem);
+  line-height:.82;
+  letter-spacing:-.065em;
+}
+.main-title .hero-title-text .outline{
+  color:transparent;
+  -webkit-text-stroke:2px var(--rise-ink);
+}
+.rise-word{
+  color:var(--rise-mint-dark);
+  position:relative;
+  display:inline-block;
+}
+.rise-word::after{
+  content:"";
+  position:absolute;
+  left:2%;right:4%;bottom:-.08em;height:.08em;
+  border-radius:999px;
+  background:var(--rise-mint);
+  transform:rotate(-1.5deg);
+  transform-origin:left;
+  animation:riseUnderline 3.2s var(--ease-out) infinite alternate;
+}
+@keyframes riseUnderline{from{transform:scaleX(.62) rotate(-1.5deg)}to{transform:scaleX(1) rotate(1deg)}}
+.rise-system-name{
+  display:block;
+  margin-top:20px;
+  font:500 11px/1.3 "DM Mono",monospace;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#74817C;
+}
+.hero-sub{max-width:650px;color:#53615B;font-size:clamp(15px,1.7vw,19px);line-height:1.55;margin-top:26px}
+.ribbon-wrap{opacity:.9}
+.ribbon-svg{opacity:.55}
+.ribbon-path-under{stroke:#E5F5EE!important;stroke-width:105px!important}
+.ribbon-path{stroke:var(--rise-mint)!important;stroke-width:3px!important;filter:none!important}
+.ribbon-text{fill:var(--rise-mint-dark)!important;font-size:10px!important;letter-spacing:.12em}
+.halftone{opacity:.045;background-image:radial-gradient(circle,var(--rise-mint-dark) 1px,transparent 1.5px);background-size:7px 7px}
+.paper-edge{background:var(--rise-line);height:18px;opacity:.9}
 
-        .role-buttons-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
-        }
+/* Story */
+.rise-story{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);
+  gap:clamp(36px,7vw,110px);
+  align-items:start;
+  padding:clamp(54px,9vw,120px) clamp(8px,4vw,52px) clamp(70px,10vw,140px);
+  position:relative;
+}
+.rise-story-copy{max-width:720px}
+.rise-eyebrow{font:500 11px/1 "DM Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--rise-mint-dark)}
+.rise-story h2{
+  margin:18px 0 24px;
+  font-family:"Unbounded",system-ui,sans-serif;
+  font-size:clamp(2rem,5vw,5rem);
+  line-height:.92;
+  letter-spacing:-.055em;
+  color:var(--rise-ink);
+}
+.rise-story h2 em{font-style:normal;color:var(--rise-mint-dark);position:relative}
+.rise-story h2 em::after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:2px;background:var(--rise-mint);transform:rotate(-2deg)}
+.rise-story-copy p{font-size:clamp(15px,1.45vw,18px);line-height:1.7;color:#596761;max-width:650px}
+.rise-story-note{font-weight:600;color:var(--rise-ink)!important;margin-top:28px;padding-left:18px;border-left:3px solid var(--rise-mint)}
+.rise-principles{display:grid;gap:14px;position:relative}
+.rise-principle{
+  min-height:180px;
+  padding:24px 26px 24px 82px;
+  background:#FBFDFC;
+  border:1px solid var(--rise-line);
+  border-radius:26px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .5s var(--ease-out),box-shadow .5s var(--ease-out),border-color .25s ease;
+}
+.rise-principle:hover,.rise-principle:focus-visible{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 18px 45px rgba(40,124,98,.10);border-color:#B8DDCE}
+.principle-number{position:absolute;left:24px;top:25px;font:500 10px/1 "DM Mono",monospace;color:#8B9892}
+.rise-principle h3{margin:36px 0 7px;font-size:23px;letter-spacing:-.03em}
+.rise-principle p{margin:0;color:#6C7772;line-height:1.5;font-size:14px;max-width:330px}
+.plant-doodle{position:absolute;right:20px;top:20px;width:44px;height:60px;opacity:.95;transition:transform .5s var(--ease-out)}
+.rise-principle:hover .plant-doodle,.rise-principle:focus-visible .plant-doodle{transform:rotate(7deg) translateY(-4px) scale(1.05)}
+.plant-doodle::before{content:"";position:absolute;left:21px;top:7px;width:2px;height:48px;background:var(--rise-mint-dark);border-radius:10px;transform:rotate(8deg)}
+.plant-doodle::after{content:"";position:absolute;left:6px;top:13px;width:19px;height:11px;border:2px solid var(--rise-mint);border-radius:100% 0 100% 0;transform:rotate(-28deg);box-shadow:18px 12px 0 -1px #fff, 19px 11px 0 1px var(--rise-mint)}
+.doodle-card:nth-child(2) .plant-doodle::after{transform:rotate(15deg);box-shadow:18px 12px 0 -1px #fff,19px 11px 0 1px var(--rise-mint)}
+.doodle-card:nth-child(3) .plant-doodle::before{transform:rotate(-8deg)}
+.doodle-card:nth-child(3) .plant-doodle::after{transform:rotate(-12deg);box-shadow:18px 12px 0 -1px #fff,19px 11px 0 1px var(--rise-mint)}
 
-        .btn-role {
-            padding: 12px;
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+/* Moving leaves */
+.rise-leaf-field{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.rise-leaf{position:absolute;width:24px;height:44px;opacity:.35;will-change:transform;filter:drop-shadow(0 5px 7px rgba(40,124,98,.08))}
+.rise-leaf svg{width:100%;height:100%;overflow:visible}
+.rise-leaf path{fill:none;stroke:var(--rise-mint);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rise-leaf .fill{fill:rgba(92,200,161,.10);stroke:var(--rise-mint-dark)}
 
-        .btn-role:hover {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
+/* Panels / cards: calm editorial system */
+.container{gap:28px}
+.left-column{gap:18px}
+.right-column{width:390px}
+.panel{
+  background:#fff;
+  border:1px solid var(--rise-line);
+  border-radius:24px;
+  box-shadow:0 12px 38px rgba(24,58,46,.055);
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.panel::after{height:3px;background:linear-gradient(90deg,transparent,var(--rise-mint),transparent);opacity:.55}
+.panel h2,.panel h3{color:var(--rise-ink);font-size:21px;letter-spacing:-.025em}
+.panel p[style]{color:#66736D!important}
+.btn-blue{
+  width:auto;min-width:210px;padding:13px 20px;
+  background:var(--rise-ink);color:#fff;border:1px solid var(--rise-ink);
+  border-radius:999px;font-weight:600;
+  box-shadow:none;transition:transform .25s var(--ease-out),background .25s ease,color .25s ease,border-color .25s ease;
+}
+.btn-blue:hover{background:var(--rise-mint);border-color:var(--rise-mint);color:#123A2D;transform:translateY(-2px)}
+.btn-blue[style*="6c757d"]{background:#F1F5F3!important;color:#51605A;border-color:#DCE8E2!important}
+.doctor-panel{justify-content:flex-start}
+.doctor-art{background:#F4FBF8;border:1px solid #E0EEE8;border-radius:22px;margin-bottom:26px;overflow:hidden}
+.doctor-art svg{display:block;width:100%;height:auto}
+.doctor-art .pulse circle:first-child{fill:#fff}
+.doctor-art .pulse path:nth-child(2){stroke:var(--rise-mint-dark)}
+.doctor-art .pulse path:nth-child(7){stroke:var(--rise-mint)}
+.services-list{color:#5F6C66}
+.services-list li{padding:8px 0;border-bottom:1px solid #EEF3F0}
+.services-list li::before{color:var(--rise-mint-dark)}
+.rol-section{background:#FAFCFB;border-color:#E4EEE9}
+.rol-section h3{color:var(--rise-mint-dark);border-bottom-color:#E2ECE7}
+.card-cita{background:#FBFDFC;border-color:#E0EBE6;border-left-color:var(--rise-mint)!important}
+.card-cita strong{color:var(--rise-mint-dark)}
+.badge-cita{background:var(--rise-mint-dark)}
+.badge-selected{background:#EAF8F2;color:var(--rise-mint-dark)}
 
-        .badge-selected {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
+/* Modal */
+.modal-overlay{background:rgba(18,50,40,.30);backdrop-filter:blur(7px)}
+.modal-content{background:#fff;border:1px solid var(--rise-line);border-radius:28px;box-shadow:0 28px 90px rgba(19,58,45,.18);padding:30px}
+.close-btn{color:#8B9892}
+.close-btn:hover{color:var(--rise-ink)}
+.form-group label{color:#53615B}
+.form-group input,.form-group textarea,.form-group select{border:1px solid #DCE8E2;border-radius:13px;background:#FCFEFD;color:var(--rise-ink);padding:12px}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--rise-mint);box-shadow:0 0 0 4px rgba(92,200,161,.12);outline:none}
+.role-buttons-grid{gap:10px}
+.btn-role{background:#F4F8F6;border:1px solid #DCE8E2;color:var(--rise-ink);border-radius:14px}
+.btn-role:hover{background:var(--rise-mint);color:#123A2D;border-color:var(--rise-mint)}
 
-        .grid-citas {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-        }
+/* Stickers become subtle plant tags */
+.sticker{background:#EAF8F2!important;color:var(--rise-mint-dark)!important;border:1px solid #BFE2D3!important;box-shadow:3px 3px 0 #D2EDE2!important;border-radius:999px!important;font-family:"DM Mono",monospace!important;font-size:10px!important;letter-spacing:.08em!important}
+.s1{transform:rotate(-4deg)}.s2{transform:rotate(4deg)}.s3{transform:rotate(-3deg)}.s4{transform:rotate(5deg)}
 
-        .card-cita {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            border: 1px solid #e2e8f0;
-            border-left-width: 4px;
-        }
+/* Mixer becomes a tiny utility, not a visual distraction */
+.mixer{background:rgba(255,255,255,.94);border:1px solid var(--rise-line);box-shadow:0 14px 40px rgba(25,62,49,.10);border-radius:18px}
+.mixer-title{color:var(--rise-ink)}
+.mixer-toggle{background:var(--rise-ink);color:#fff}
+.theme-btn{background:#F5F8F6!important;color:#52605A!important;border-color:#DCE8E2!important}
+.theme-btn:hover,.theme-btn.active{background:var(--rise-mint)!important;color:#123A2D!important;border-color:var(--rise-mint)!important}
+.theme-btn-rise{font-weight:700}
 
-        .card-cita strong {
-            color: #0056b3;
-        }
+/* Remove rainbow feeling from legacy themes only when RISE is active */
+html[data-theme="rise"] .sticker.s1,html[data-theme="rise"] .sticker.s2,html[data-theme="rise"] .sticker.s3,html[data-theme="rise"] .sticker.s4{background:#EAF8F2!important}
 
-        .badge-cita {
-            background-color: #28a745;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            float: right;
-        }
-    </style>
+@media (max-width:900px){
+  .rise-story{grid-template-columns:1fr;padding-left:0;padding-right:0}
+  .rise-principles{max-width:720px}
+  .right-column{width:auto}
+}
+@media (max-width:600px){
+  .main-title{min-height:570px;padding:26px;border-radius:26px}
+  .main-title .hero-title-text{font-size:clamp(3.1rem,15vw,5.8rem)}
+  .rise-story{padding-top:64px;padding-bottom:80px}
+  .rise-story h2{font-size:clamp(2rem,9vw,3.6rem)}
+  .rise-principle{padding-left:68px;min-height:165px}
+  .rise-leaf{opacity:.25}
+}
+@media (max-width:380px){
+  .main-title{min-height:530px;padding:20px;border-radius:22px}
+  .panel{padding:20px}
+  .rise-principle{padding:20px 20px 20px 62px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rise-leaf-field{display:none}
+  .rise-word::after{animation:none}
+}
+
+
+
+/* =========================================================
+   RISE 2.0 — Botanical editorial expansion
+   ========================================================= */
+:root{
+  --rise-mint-2:#8EDFC3;
+  --rise-pale:#F3FBF7;
+  --rise-pale-2:#F8FCFA;
+  --rise-dark:#17322A;
+  --rise-muted:#718079;
+  --rise-border:#DDEBE5;
+  --rise-dot:rgba(40,124,98,.14);
+}
+
+/* Quiet paper / botanical texture */
+html[data-theme="rise"] body{
+  background:
+    radial-gradient(circle at 7% 12%,rgba(92,200,161,.08),transparent 20%),
+    radial-gradient(circle at 92% 46%,rgba(142,223,195,.10),transparent 24%),
+    linear-gradient(#fff,#fff);
+}
+html[data-theme="rise"] body::after{
+  opacity:.035;
+  background-image:
+    radial-gradient(circle at 2px 2px,var(--rise-dot) 1px,transparent 1.2px),
+    linear-gradient(115deg,transparent 48%,rgba(92,200,161,.035) 49%,transparent 51%);
+  background-size:9px 9px,42px 42px;
+  mask-image:linear-gradient(to bottom,black,rgba(0,0,0,.35) 55%,transparent 100%);
+}
+
+.rise-section{
+  position:relative;
+  width:min(1240px,100%);
+  margin:0 auto;
+  padding:clamp(76px,10vw,145px) clamp(10px,4vw,48px);
+  overflow:hidden;
+}
+.rise-section::before{
+  content:"";
+  position:absolute;
+  width:360px;height:360px;
+  border-radius:52% 48% 61% 39% / 43% 56% 44% 57%;
+  background:rgba(142,223,195,.11);
+  filter:blur(2px);
+  right:-190px;top:40px;
+  pointer-events:none;
+}
+.rise-section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:48px;position:relative;z-index:2}
+.rise-section-kicker{font:500 10px/1.2 "DM Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--rise-mint-dark);display:block;margin-bottom:14px}
+.rise-section-title{font-family:"Unbounded",system-ui,sans-serif;font-size:clamp(2rem,5vw,4.7rem);line-height:.94;letter-spacing:-.055em;margin:0;color:var(--rise-dark);max-width:760px}
+.rise-section-title em{font-style:normal;color:var(--rise-mint-dark)}
+.rise-section-intro{max-width:380px;color:var(--rise-muted);line-height:1.65;font-size:15px;margin:0}
+
+/* Human pulse strip */
+.rise-pulse{
+  width:100%;
+  border-top:1px solid var(--rise-border);
+  border-bottom:1px solid var(--rise-border);
+  overflow:hidden;
+  background:#fff;
+}
+.rise-pulse-track{display:flex;width:max-content;animation:riseMarquee 28s linear infinite}
+.rise-pulse-item{display:flex;align-items:center;gap:24px;padding:17px 28px;font:500 10px "DM Mono",monospace;letter-spacing:.13em;text-transform:uppercase;color:#53635C;white-space:nowrap}
+.rise-pulse-item b{color:var(--rise-mint-dark);font-weight:500}
+.rise-pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--rise-mint);box-shadow:0 0 0 5px rgba(92,200,161,.10)}
+@keyframes riseMarquee{to{transform:translateX(-50%)}}
+
+/* Story timeline */
+.rise-timeline{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(40px,8vw,110px);align-items:start}
+.rise-timeline-line{position:absolute;left:clamp(10px,4vw,48px);top:0;bottom:0;width:1px;background:linear-gradient(var(--rise-border),var(--rise-mint),var(--rise-border));transform-origin:top;transform:scaleY(.1)}
+.rise-timeline-list{display:grid;gap:16px}
+.rise-step{position:relative;display:grid;grid-template-columns:64px 1fr;gap:18px;padding:24px;background:var(--rise-pale-2);border:1px solid var(--rise-border);border-radius:24px;transition:transform .5s var(--ease-out),border-color .3s,box-shadow .5s;overflow:hidden}
+.rise-step::after{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--rise-mint);transform:scaleY(0);transform-origin:top;transition:transform .5s var(--ease-out)}
+.rise-step:hover{transform:translateX(8px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));border-color:#BBDDCF;box-shadow:0 18px 50px rgba(25,62,49,.08)}
+.rise-step:hover::after{transform:scaleY(1)}
+.rise-step-no{font:500 11px "DM Mono",monospace;color:var(--rise-mint-dark);padding-top:4px}
+.rise-step h3{margin:0 0 7px;font-size:21px;letter-spacing:-.03em}
+.rise-step p{margin:0;color:var(--rise-muted);line-height:1.55;font-size:14px}
+.rise-step-leaf{position:absolute;right:18px;bottom:12px;width:34px;height:48px;opacity:.5;transform:rotate(12deg)}
+.rise-step-leaf::before{content:"";position:absolute;left:16px;top:0;width:2px;height:48px;background:var(--rise-mint-dark);border-radius:99px}
+.rise-step-leaf::after{content:"";position:absolute;left:0;top:12px;width:21px;height:12px;border:1.5px solid var(--rise-mint);border-radius:100% 0 100% 0;transform:rotate(-30deg);box-shadow:16px 12px 0 -1px #fff,17px 11px 0 .5px var(--rise-mint)}
+
+/* System at a glance */
+.rise-glance{background:#F7FCF9;border-top:1px solid var(--rise-border);border-bottom:1px solid var(--rise-border)}
+.rise-glance-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
+.rise-board{background:#fff;border:1px solid var(--rise-border);border-radius:28px;padding:24px;box-shadow:0 20px 60px rgba(25,62,49,.06);position:relative;overflow:hidden}
+.rise-board::before{content:"RISE / SYSTEM FLOW";font:500 9px "DM Mono",monospace;letter-spacing:.16em;color:#9AA69F;position:absolute;right:24px;top:25px}
+.rise-board-top{display:flex;gap:10px;align-items:center;margin-bottom:28px}
+.rise-window-dot{width:8px;height:8px;border-radius:50%;background:#DCE8E2}.rise-window-dot:nth-child(2){background:#BEEBDD}.rise-window-dot:nth-child(3){background:var(--rise-mint)}
+.rise-board-label{font:600 12px "DM Mono",monospace;letter-spacing:.08em;color:var(--rise-dark);margin-left:8px}
+.rise-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rise-stat{padding:20px;border-radius:20px;background:var(--rise-pale);border:1px solid #E5F0EB;min-height:125px;position:relative;overflow:hidden}
+.rise-stat strong{display:block;font-family:"Unbounded",sans-serif;font-size:clamp(1.45rem,3vw,2.5rem);letter-spacing:-.06em;color:var(--rise-dark);margin-bottom:9px}
+.rise-stat span{font:500 10px "DM Mono",monospace;text-transform:uppercase;letter-spacing:.1em;color:#718079}
+.rise-stat-line{position:absolute;left:20px;right:20px;bottom:17px;height:2px;background:#DDEBE5;overflow:hidden}
+.rise-stat-line i{display:block;height:100%;width:68%;background:var(--rise-mint);transform-origin:left;animation:riseBar 2.4s var(--ease-out) infinite alternate}
+@keyframes riseBar{from{transform:scaleX(.55)}to{transform:scaleX(1)}}
+.rise-mini-stack{display:grid;gap:12px}
+.rise-mini-card{transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s var(--ease-out),box-shadow .4s,border-color .25s;padding:21px 22px;border:1px solid var(--rise-border);border-radius:22px;background:#fff;min-height:116px;position:relative}
+.rise-mini-card small{font:500 9px "DM Mono",monospace;letter-spacing:.13em;color:#8B9892;text-transform:uppercase}
+.rise-mini-card h3{font-size:18px;margin:10px 0 4px;color:var(--rise-dark)}
+.rise-mini-card p{margin:0;color:var(--rise-muted);font-size:13px;line-height:1.45}
+.rise-mini-card .mini-leaf{position:absolute;right:18px;top:18px;width:24px;height:35px;opacity:.45}
+.rise-mini-card .mini-leaf::before{content:"";position:absolute;left:11px;top:0;width:2px;height:34px;background:var(--rise-mint-dark)}
+.rise-mini-card .mini-leaf::after{content:"";position:absolute;left:0;top:8px;width:15px;height:9px;border:1px solid var(--rise-mint);border-radius:100% 0 100% 0;transform:rotate(-25deg);box-shadow:10px 10px 0 -1px #fff,11px 9px 0 0 var(--rise-mint)}
+
+/* Role ecosystem */
+.rise-ecosystem{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(35px,8vw,110px);align-items:center}
+.rise-ecosystem-copy p{color:var(--rise-muted);line-height:1.7;max-width:520px}
+.rise-role-orbit{position:relative;min-height:510px;display:grid;place-items:center}
+.rise-orbit-ring{position:absolute;width:min(82%,430px);aspect-ratio:1;border:1px dashed #BFDCD0;border-radius:50%;animation:riseOrbit 28s linear infinite}
+.rise-orbit-ring:nth-child(2){width:min(58%,300px);animation-direction:reverse;animation-duration:20s}
+.rise-orbit-center{position:relative;z-index:3;width:145px;height:145px;border-radius:50%;background:var(--rise-dark);color:#fff;display:grid;place-items:center;text-align:center;box-shadow:0 20px 50px rgba(23,50,42,.18)}
+.rise-orbit-center strong{font-family:"Unbounded";font-size:23px;letter-spacing:-.06em}.rise-orbit-center small{font:500 9px "DM Mono";letter-spacing:.12em;color:#BEEBDD;text-transform:uppercase}
+.rise-role-node{position:absolute;z-index:4;width:126px;height:126px;border-radius:50%;background:#fff;border:1px solid var(--rise-border);display:grid;place-items:center;text-align:center;box-shadow:0 14px 40px rgba(25,62,49,.08);transition:transform .45s var(--ease-out),border-color .25s}
+.rise-role-node:hover{transform:scale(1.08) rotate(-3deg);border-color:var(--rise-mint)}
+.rise-role-node strong{display:block;font-size:15px;color:var(--rise-dark)}.rise-role-node span{display:block;margin-top:5px;font:500 8px "DM Mono";letter-spacing:.1em;text-transform:uppercase;color:#84918B}
+.rise-role-node:nth-of-type(3){top:7%;left:50%;transform:translateX(-50%)}
+.rise-role-node:nth-of-type(4){right:3%;top:50%;transform:translateY(-50%)}
+.rise-role-node:nth-of-type(5){bottom:6%;left:50%;transform:translateX(-50%)}
+.rise-role-node:nth-of-type(6){left:3%;top:50%;transform:translateY(-50%)}
+@keyframes riseOrbit{to{transform:rotate(360deg)}}
+
+/* Botanical manifesto */
+.rise-manifesto{min-height:500px;display:grid;place-items:center;text-align:center;border-top:1px solid var(--rise-border)}
+.rise-manifesto::before,.rise-manifesto::after{content:"";position:absolute;pointer-events:none;border:1px solid rgba(92,200,161,.20);border-radius:55% 45% 50% 50%;width:280px;height:420px;transform:rotate(28deg);left:2%;top:50%;}
+.rise-manifesto::after{left:auto;right:2%;transform:rotate(-28deg)}
+.rise-manifesto-word{font-family:"Unbounded",sans-serif;font-size:clamp(3rem,9vw,9rem);line-height:.86;letter-spacing:-.075em;color:var(--rise-dark);max-width:1100px;position:relative;z-index:2}
+.rise-manifesto-word span{color:var(--rise-mint-dark);display:inline-block}
+.rise-manifesto-caption{display:block;margin-top:28px;color:var(--rise-muted);font-size:15px;max-width:550px;line-height:1.6;position:relative;z-index:2}
+
+/* Final CTA */
+.rise-final{padding-top:80px;padding-bottom:110px}
+.rise-final-card{position:relative;overflow:hidden;background:var(--rise-dark);color:#fff;border-radius:34px;padding:clamp(34px,6vw,78px);min-height:360px;display:flex;justify-content:space-between;align-items:end;gap:40px;box-shadow:0 30px 100px rgba(23,50,42,.15)}
+.rise-final-card::before{content:"";position:absolute;width:480px;height:480px;border-radius:50%;right:-150px;top:-180px;background:radial-gradient(circle,rgba(92,200,161,.38),transparent 66%);filter:blur(5px)}
+.rise-final-card::after{content:"RISE";position:absolute;right:32px;bottom:-30px;font-family:"Unbounded";font-size:clamp(6rem,17vw,15rem);line-height:1;color:rgba(255,255,255,.045);letter-spacing:-.08em}
+.rise-final-card h2{font-family:"Unbounded";font-size:clamp(2rem,5.4vw,5.5rem);line-height:.9;letter-spacing:-.06em;margin:0;max-width:700px;position:relative;z-index:2}
+.rise-final-card h2 em{font-style:normal;color:var(--rise-mint-2)}
+.rise-final-card p{max-width:400px;color:#C9D7D1;line-height:1.65;position:relative;z-index:2}
+.rise-final-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:210px!important;background:#fff!important;color:var(--rise-dark)!important;border-color:#fff!important;position:relative;z-index:3}
+.rise-final-btn:hover{background:var(--rise-mint)!important;border-color:var(--rise-mint)!important}
+
+/* Dynamic botanical strokes */
+.rise-doodle{position:absolute;pointer-events:none;opacity:.45}
+.rise-doodle svg{display:block;width:100%;height:100%}
+.rise-doodle path{fill:none;stroke:var(--rise-mint);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.rise-doodle .soft{stroke:#BEEBDD}
+.rise-doodle.leaf-a{width:72px;height:92px;left:3%;top:16%;transform:rotate(-12deg)}
+.rise-doodle.leaf-b{width:80px;height:100px;right:4%;bottom:13%;transform:rotate(18deg)}
+.rise-doodle.star{width:50px;height:50px;right:12%;top:14%}
+
+/* Scroll reveal layers */
+.rise-print{opacity:0;transform:translateY(28px);clip-path:inset(10% 0 0 0);transition:opacity .7s var(--ease-out),transform .8s var(--ease-out),clip-path .8s var(--ease-out)}
+.rise-print.is-visible{opacity:1;transform:none;clip-path:inset(0)}
+.rise-print.is-visible::before{animation:risePrintIn .75s var(--ease-out) both}
+@keyframes risePrintIn{from{transform:translateX(-14px);opacity:0}to{transform:none;opacity:1}}
+
+@media(max-width:900px){
+  .rise-timeline,.rise-glance-grid,.rise-ecosystem{grid-template-columns:1fr}
+  .rise-section-head{display:block}.rise-section-intro{margin-top:20px}
+  .rise-role-orbit{min-height:440px}.rise-orbit-ring{width:360px}.rise-orbit-ring:nth-child(2){width:250px}
+}
+@media(max-width:620px){
+  .rise-section{padding-top:72px;padding-bottom:80px}
+  .rise-stat-grid{grid-template-columns:1fr}
+  .rise-stat{min-height:105px}
+  .rise-role-orbit{min-height:390px}.rise-orbit-ring{width:300px}.rise-orbit-ring:nth-child(2){width:210px}
+  .rise-role-node{width:96px;height:96px}.rise-role-node strong{font-size:12px}.rise-role-node span{font-size:7px}
+  .rise-role-node:nth-of-type(3){top:3%}.rise-role-node:nth-of-type(5){bottom:2%}
+  .rise-final-card{display:block;min-height:430px}.rise-final-card p{margin-top:25px}.rise-final-btn{margin-top:28px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rise-pulse-track,.rise-orbit-ring,.rise-stat-line i{animation:none!important}
+  .rise-print{opacity:1;transform:none;clip-path:none;transition:none}
+}
+
+</style>
+
+<!-- Inline SVG filters / generative resources -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <filter id="grain-soft">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <filter id="gooey" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 18 -7" result="goo"/>
+      <feBlend in="SourceGraphic" in2="goo"/>
+    </filter>
+    <linearGradient id="heroRainbow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1F4BFF"/>
+      <stop offset="18%" stop-color="#6B4BFF"/>
+      <stop offset="36%" stop-color="#FF4B3E"/>
+      <stop offset="52%" stop-color="#FF7A00"/>
+      <stop offset="68%" stop-color="#FFE83A"/>
+      <stop offset="84%" stop-color="#FF5FB0"/>
+      <stop offset="100%" stop-color="#4FD1B0"/>
+    </linearGradient>
+  </defs>
+</svg>
 </head>
+
 <body>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress-ribbon" aria-hidden="true"><span id="scrollProgress"></span></div>
+<div class="custom-cursor" id="customCursor" aria-hidden="true"><span class="cursor-label"></span></div>
 
-    <h1 class="main-title">Sistema de Gestión Hospitalaria</h1>
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-core">
+    <div class="loader-blobs">
+      <span class="loader-blob"></span><span class="loader-blob"></span><span class="loader-blob"></span>
+    </div>
+    <div class="loader-count" id="loaderCount">0</div>
+    <div class="loader-label">Preparando el sistema</div>
+  </div>
+</div>
 
-    <div class="container">
+<div class="page-shell">
+  <!-- Original main title preserved, redesigned as the hero -->
+  <h1 class="main-title">
+    <span class="ribbon-wrap" aria-hidden="true">
+      <svg class="ribbon-svg" viewBox="0 0 1200 650" preserveAspectRatio="none">
+        <path class="ribbon-path-under" d="M-80 510 C160 220 290 610 515 390 S850 70 1280 285"/>
+        <path id="heroRibbonPath" class="ribbon-path" pathLength="1" d="M-80 510 C160 220 290 610 515 390 S850 70 1280 285"/>
+        <path id="heroTextPath" d="M-80 510 C160 220 290 610 515 390 S850 70 1280 285" fill="none"/>
+        <text class="ribbon-text">
+          <textPath href="#heroTextPath" startOffset="0%">
+            SISTEMA DE GESTIÓN HOSPITALARIA • CITAS • USUARIOS • ATENCIÓN • ORGANIZACIÓN •
+          </textPath>
+        </text>
+      </svg>
+    </span>
 
-        <div class="left-column">
-            
-            <!-- Panel de Acción: Botón para abrir Modal de Registro -->
-            <div class="panel">
-                <h2>Gestión de Usuarios</h2>
-                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Haz clic en el siguiente botón para dar de alta a un nuevo integrante en el sistema.</p>
-                <button class="btn-blue" onclick="abrirModalRegistro()">+ Registrar Nuevo Usuario</button>
-            </div>
+    <span class="hero-copy">
+      <span class="hero-kicker">RISE · Gestión humana · Atención real</span>
+      <span aria-hidden="true" class="halftone"></span>
+      <span style="position:relative;z-index:3">
+        <span style="display:block;font-size:clamp(10px,1vw,13px);font:500 11px 'DM Mono',monospace;letter-spacing:.16em;color:#fff;margin-bottom:18px;text-transform:uppercase">
+          Plataforma hospitalaria
+        </span>
+        <span style="display:block" class="hero-title-text"><span class="rise-word">RISE</span> <span class="outline">Gestión</span> Humana</span>
+        <span class="rise-system-name">Sistema de Gestión Hospitalaria</span>
+      </span>
+      <span class="hero-sub">
+        Un gestor humano, accesible y real para registrar personas, organizar roles, agendar citas y mantener la atención en movimiento.
+      </span>
+    </span>
+  </h1>
 
-            <!-- Panel: Lista de Usuarios -->
-            <div class="panel">
-                <h2>Lista de Usuarios Registrados</h2>
-                <!-- Botón de Alternar Lista (Abrir/Cerrar) -->
-                <button id="btnToggleLista" class="btn-blue btn-toggle" onclick="toggleListaUsuarios()">Cargar / Mostrar Lista</button>
-                <div id="listaUsuarios" style="margin-top: 10px; display: none;">
+  <div class="paper-edge" aria-hidden="true"></div>
 
-                </div>
-            </div>
+  <!-- RISE story: brand narrative added without changing the original workflow -->
+  <section class="rise-story reveal" aria-labelledby="rise-story-title">
+    <div class="rise-story-copy">
+      <span class="rise-eyebrow">01 · La historia de RISE</span>
+      <h2 id="rise-story-title">La tecnología puede <em>ordenar</em> sin dejar de sentirse humana.</h2>
+      <p>RISE nace como una idea sencilla: que la gestión hospitalaria no tenga que sentirse fría, complicada o distante. El sistema convierte tareas administrativas en pasos claros, visibles y fáciles de entender para las personas que están detrás de cada cita, cada registro y cada decisión.</p>
+      <p class="rise-story-note">No busca sustituir la atención humana. Busca quitarle fricción.</p>
+    </div>
+    <div class="rise-principles" aria-label="Principios de RISE">
+      <article class="rise-principle doodle-card" tabindex="0">
+        <span class="principle-number">01</span>
+        <span class="plant-doodle" data-doodle="1" aria-hidden="true"></span>
+        <h3>Humano</h3>
+        <p>La interfaz habla como una persona y acompaña cada acción.</p>
+      </article>
+      <article class="rise-principle doodle-card" tabindex="0">
+        <span class="principle-number">02</span>
+        <span class="plant-doodle" data-doodle="2" aria-hidden="true"></span>
+        <h3>Accesible</h3>
+        <p>Menos ruido visual. Más claridad para encontrar lo importante.</p>
+      </article>
+      <article class="rise-principle doodle-card" tabindex="0">
+        <span class="principle-number">03</span>
+        <span class="plant-doodle" data-doodle="3" aria-hidden="true"></span>
+        <h3>Real</h3>
+        <p>Diseñado alrededor de tareas reales, no de procesos perfectos.</p>
+      </article>
+    </div>
+  </section>
 
-            <!-- Panel: Agendar Nueva Cita -->
-            <div class="panel">
-                <h2>Agendar Nueva Cita</h2>
-                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Haz clic en el siguiente botón para agendar una nueva cita médica en el sistema.</p>
-                <button class="btn-blue" onclick="abrirModalCita()">Agendar Nueva Cita</button>
-            </div>
+  <div class="rise-leaf-field" aria-hidden="true"></div>
 
-            <!-- Panel: Lista de Citas Médicas -->
-            <div class="panel">
-                <h2>Citas Médicas Agendadas</h2>
-                <button id="btnToggleCitas" class="btn-blue btn-toggle" onclick="toggleListaCitas()">Cargar / Mostrar Citas</button>
-                <div id="listaCitas" class="grid-citas" style="display: none;">
-                    <!-- Se carga dinámicamente -->
-                </div>
-            </div>
 
+
+  <!-- =====================================================
+       RISE 02 — The way it thinks
+       ===================================================== -->
+  <div class="rise-pulse" aria-label="Ideas clave de RISE">
+    <div class="rise-pulse-track">
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>PERSONAS</b> antes que procesos</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>CLARIDAD</b> antes que ruido</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>ORDEN</b> que acompaña</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>ATENCIÓN</b> que sigue fluyendo</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>PERSONAS</b> antes que procesos</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>CLARIDAD</b> antes que ruido</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>ORDEN</b> que acompaña</span>
+      <span class="rise-pulse-item"><i class="rise-pulse-dot"></i><b>ATENCIÓN</b> que sigue fluyendo</span>
+    </div>
+  </div>
+
+  <section class="rise-section rise-print" aria-labelledby="rise-process-title">
+    <div class="rise-doodle leaf-a" aria-hidden="true"><svg viewBox="0 0 72 92"><path d="M36 88C36 60 34 35 39 5"/><path d="M37 61C18 58 9 46 11 34C25 34 37 43 37 61Z"/><path d="M38 45C53 42 63 31 61 20C48 21 39 30 38 45Z"/><path class="soft" d="M36 75C23 72 16 65 16 57"/></svg></div>
+    <div class="rise-section-head">
+      <div>
+        <span class="rise-section-kicker">02 · Cómo piensa RISE</span>
+        <h2 class="rise-section-title" id="rise-process-title">Menos pasos. Más <em>presencia.</em></h2>
+      </div>
+      <p class="rise-section-intro">Cada pantalla tiene una intención. Cada acción debe sentirse evidente. RISE organiza el trabajo sin esconder a las personas que lo hacen posible.</p>
+    </div>
+    <div class="rise-timeline">
+      <div>
+        <p class="rise-section-intro" style="max-width:430px;margin-top:0">La experiencia sigue un recorrido natural: entender, actuar, confirmar y continuar. El sistema se adapta al ritmo de la operación.</p>
+      </div>
+      <div class="rise-timeline-list">
+        <article class="rise-step rise-print"><span class="rise-step-no">01 / ENTENDER</span><div><h3>Ves lo importante primero.</h3><p>Usuarios, citas y acciones principales aparecen sin competir entre sí.</p></div><i class="rise-step-leaf" aria-hidden="true"></i></article>
+        <article class="rise-step rise-print"><span class="rise-step-no">02 / ACTUAR</span><div><h3>Una acción, una intención.</h3><p>Registrar y agendar conservan un lenguaje directo para reducir dudas.</p></div><i class="rise-step-leaf" aria-hidden="true"></i></article>
+        <article class="rise-step rise-print"><span class="rise-step-no">03 / CONFIRMAR</span><div><h3>El sistema responde.</h3><p>La información vuelve a la interfaz y mantiene visible el resultado.</p></div><i class="rise-step-leaf" aria-hidden="true"></i></article>
+        <article class="rise-step rise-print"><span class="rise-step-no">04 / CONTINUAR</span><div><h3>La atención sigue.</h3><p>RISE acompaña el siguiente paso sin convertir cada tarea en un laberinto.</p></div><i class="rise-step-leaf" aria-hidden="true"></i></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rise-section rise-glance rise-print" aria-labelledby="rise-glance-title">
+    <div class="rise-section-head">
+      <div>
+        <span class="rise-section-kicker">03 · Una mirada al sistema</span>
+        <h2 class="rise-section-title" id="rise-glance-title">Todo en su sitio. <em>Sin perder el pulso.</em></h2>
+      </div>
+      <p class="rise-section-intro">Una representación visual de cómo RISE reúne la operación cotidiana en una sola experiencia.</p>
+    </div>
+    <div class="rise-glance-grid">
+      <div class="rise-board">
+        <div class="rise-board-top"><i class="rise-window-dot"></i><i class="rise-window-dot"></i><i class="rise-window-dot"></i><span class="rise-board-label">RISE / OVERVIEW</span></div>
+        <div class="rise-stat-grid">
+          <div class="rise-stat"><strong data-rise-counter="128">0</strong><span>Usuarios gestionados</span><div class="rise-stat-line"><i></i></div></div>
+          <div class="rise-stat"><strong data-rise-counter="42">0</strong><span>Citas organizadas</span><div class="rise-stat-line"><i style="width:82%"></i></div></div>
+          <div class="rise-stat"><strong data-rise-counter="4">0</strong><span>Roles principales</span><div class="rise-stat-line"><i style="width:46%"></i></div></div>
         </div>
+      </div>
+      <div class="rise-mini-stack">
+        <article class="rise-mini-card"><small>Estado</small><h3>Todo en movimiento.</h3><p>Las acciones importantes permanecen visibles y conectadas.</p><i class="mini-leaf" aria-hidden="true"></i></article>
+        <article class="rise-mini-card"><small>Experiencia</small><h3>Hecho para personas.</h3><p>Lenguaje claro, espacios respirables y decisiones sencillas.</p><i class="mini-leaf" aria-hidden="true"></i></article>
+        <article class="rise-mini-card"><small>Principio</small><h3>La tecnología acompaña.</h3><p>El sistema ayuda a organizar, no a complicar.</p><i class="mini-leaf" aria-hidden="true"></i></article>
+      </div>
+    </div>
+  </section>
 
-        <div class="right-column">
-            <div class="panel doctor-panel">
-                <img src="https://i.pinimg.com/736x/37/25/1e/37251eab10cb27e8b11515a3c78ce64d.jpg" alt="Médico">
-                <h2>Servicios de Citas Médicas</h2>
-                <ul class="services-list">
-                    <li>Programación fácil de citas</li>
-                    <li>Consultas generales y especializadas</li>
-                    <li>Telemedicina disponible</li>
-                    <li>Recordatorios de citas automatizados</li>
-                </ul>
-            </div>
+  <section class="rise-section rise-print" aria-labelledby="rise-ecosystem-title">
+    <div class="rise-ecosystem">
+      <div class="rise-ecosystem-copy">
+        <span class="rise-section-kicker">04 · Un sistema hecho de personas</span>
+        <h2 class="rise-section-title" id="rise-ecosystem-title">Cada rol tiene una <em>voz.</em></h2>
+        <p>RISE conecta las tareas de pacientes, doctores, recepción y administración alrededor de una misma idea: que la información correcta llegue a la persona correcta en el momento correcto.</p>
+        <p>El diseño no intenta borrar las diferencias entre roles. Las hace comprensibles.</p>
+      </div>
+      <div class="rise-role-orbit" aria-label="Ecosistema de roles de RISE">
+        <span class="rise-orbit-ring"></span><span class="rise-orbit-ring"></span>
+        <div class="rise-orbit-center"><div><strong>RISE</strong><br><small>conecta</small></div></div>
+        <div class="rise-role-node"><div><strong>Paciente</strong><span>experiencia</span></div></div>
+        <div class="rise-role-node"><div><strong>Doctor</strong><span>atención</span></div></div>
+        <div class="rise-role-node"><div><strong>Recepción</strong><span>ritmo</span></div></div>
+        <div class="rise-role-node"><div><strong>Admin</strong><span>orden</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rise-section rise-manifesto rise-print" aria-labelledby="rise-manifesto-title">
+    <div class="rise-doodle star" aria-hidden="true"><svg viewBox="0 0 50 50"><path d="M25 4L29 20L46 25L29 30L25 46L21 30L4 25L21 20Z"/><path class="soft" d="M25 13V37M13 25H37"/></svg></div>
+    <div>
+      <span class="rise-section-kicker">05 · El manifiesto</span>
+      <h2 class="rise-manifesto-word" id="rise-manifesto-title">Gestionar<br><span>también</span> es cuidar.</h2>
+      <p class="rise-manifesto-caption">Cuando el sistema hace espacio para las personas, la tecnología deja de sentirse como una barrera y comienza a sentirse como apoyo.</p>
+    </div>
+  </section>
+
+  <section class="rise-section rise-final rise-print" aria-labelledby="rise-final-title">
+    <div class="rise-final-card">
+      <div>
+        <span class="rise-section-kicker" style="color:#8EDFC3">06 · RISE</span>
+        <h2 id="rise-final-title">La gestión puede ser más <em>humana.</em></h2>
+        <p>Un sistema claro para que cada persona pueda concentrarse en lo que realmente importa: mantener la atención en movimiento.</p>
+      </div>
+      <button class="btn-blue rise-final-btn magnetic" type="button" onclick="abrirModalRegistro()">Empezar con RISE →</button>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <div class="left-column">
+
+      <!-- Panel de Acción: Botón para abrir Modal de Registro -->
+      <div class="panel reveal">
+        <h2>Gestión de Usuarios</h2>
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">
+          Haz clic en el siguiente botón para dar de alta a un nuevo integrante en el sistema.
+        </p>
+        <button class="btn-blue magnetic" onclick="abrirModalRegistro()">+ Registrar Nuevo Usuario</button>
+      </div>
+
+      <!-- Panel: Lista de Usuarios -->
+      <div class="panel reveal">
+        <h2>Lista de Usuarios Registrados</h2>
+        <button id="btnToggleLista" class="btn-blue btn-toggle magnetic" onclick="toggleListaUsuarios()">Cargar / Mostrar Lista</button>
+        <div id="listaUsuarios" style="margin-top:10px;display:none;"></div>
+      </div>
+
+      <!-- Panel: Agendar Nueva Cita -->
+      <div class="panel reveal">
+        <h2>Agendar Nueva Cita</h2>
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">
+          Haz clic en el siguiente botón para agendar una nueva cita médica en el sistema.
+        </p>
+        <button class="btn-blue magnetic" onclick="abrirModalCita()">Agendar Nueva Cita</button>
+      </div>
+
+      <!-- Panel: Lista de Citas Médicas -->
+      <div class="panel reveal">
+        <h2>Citas Médicas Agendadas</h2>
+        <button id="btnToggleCitas" class="btn-blue btn-toggle magnetic" onclick="toggleListaCitas()">Cargar / Mostrar Citas</button>
+        <div id="listaCitas" class="grid-citas" style="display:none;">
+          <!-- Se carga dinámicamente -->
         </div>
+      </div>
 
     </div>
 
-    <!-- MODAL DE REGISTRO DE USUARIOS -->
-    <div id="modalRegistro" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-btn" onclick="cerrarModal()">&times;</span>
-            
-            <!-- PASO 1: Selección de Rol -->
-            <div id="pasoSeleccionRol">
-                <h2 style="margin-top:0;">¿Qué usuario deseas registrar?</h2>
-                <p style="color: #666; font-size: 14px;">Selecciona una opción para continuar:</p>
-                
-                <div class="role-buttons-grid">
-                    <button class="btn-role" onclick="seleccionarRol('Paciente')">Paciente</button>
-                    <button class="btn-role" onclick="seleccionarRol('Doctor')">Doctor</button>
-                    <button class="btn-role" onclick="seleccionarRol('Administrador')">Administrador</button>
-                    <button class="btn-role" onclick="seleccionarRol('Recepcionista')">Recepcionista</button>
-                </div>
-            </div>
-
-            <!-- Verificación de Contraseña de Administrador -->
-            <div id="pasoClaveAdmin" style="display: none;">
-                <h2 style="margin-top:0; color: #d9534f;">Seguridad Requerida</h2>
-                <p style="color: #555; font-size: 14px;">Para registrar un <strong>Administrador</strong>, debes ingresar la contraseña de autorización del sistema:</p>
-                
-                <div class="form-group">
-                    <label for="claveAdmin">Contraseña de autorización:</label>
-                    <input type="password" id="claveAdmin" placeholder="Ingresa la clave de admin">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-blue" onclick="validarClaveAdmin()">Verificar</button>
-                    <button class="btn-blue" style="background-color: #6c757d;" onclick="volverASeleccion()">Volver</button>
-                </div>
-            </div>
-
-            <!-- Formulario de Registro de Información -->
-            <div id="pasoFormulario" style="display: none;">
-                <div class="badge-selected">Registrando: <span id="lblRolSeleccionado"></span></div>
-                
-                <div class="form-group">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" placeholder="Nombre(s)">
-                </div>
-
-                <div class="form-group">
-                    <label for="apellidoP">Apellido Paterno:</label>
-                    <input type="text" id="apellidoP" placeholder="Apellido paterno">
-                </div>
-
-                <div class="form-group">
-                    <label for="apellidoM">Apellido Materno:</label>
-                    <input type="text" id="apellidoM" placeholder="Apellido materno">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Correo Electrónico:</label>
-                    <input type="email" id="email" placeholder="ejemplo@correo.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" placeholder="Número telefónico">
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn-blue" onclick="guardarUsuario()">Registrar</button>
-                    <button class="btn-blue" style="background-color: #6c757d;" onclick="volverASeleccion()">Cambiar Rol</button>
-                </div>
-            </div>
-
+    <div class="right-column">
+      <div class="panel doctor-panel reveal">
+        <!-- Se conserva la función visual del bloque "Médico", pero sin fotografía externa -->
+        <div class="doctor-art" role="img" aria-label="Ilustración generativa de un médico">
+          <svg viewBox="0 0 500 330" aria-hidden="true">
+            <g class="pulse">
+              <circle cx="250" cy="112" r="55" fill="#F7F7F3" stroke="#111" stroke-width="7"/>
+              <path d="M195 105 Q250 45 305 105" fill="none" stroke="#1F4BFF" stroke-width="15" stroke-linecap="round"/>
+              <circle cx="230" cy="112" r="5" fill="#111"/>
+              <circle cx="270" cy="112" r="5" fill="#111"/>
+              <path d="M232 137 Q250 150 268 137" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+              <path d="M165 285 Q168 190 205 168 Q250 148 295 168 Q332 190 335 285" fill="#EDEDE6" stroke="#111" stroke-width="7"/>
+              <path d="M250 168 L250 285" stroke="#111" stroke-width="5"/>
+              <path d="M205 168 L250 215 L295 168" fill="none" stroke="#FF4B3E" stroke-width="9"/>
+              <rect x="271" y="216" width="39" height="49" rx="8" fill="#4FD1B0" stroke="#111" stroke-width="5"/>
+              <path d="M290 228 v25 M278 240 h25" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+            </g>
+            <path d="M35 280 H135" stroke="#1F4BFF" stroke-width="8" stroke-linecap="round"/>
+            <path d="M365 70 H465" stroke="#FF5FB0" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="75" cy="235" r="11" fill="#D8F53A" stroke="#111" stroke-width="4"/>
+            <circle cx="425" cy="115" r="11" fill="#C9A7FF" stroke="#111" stroke-width="4"/>
+          </svg>
         </div>
+        <h2>Servicios de Citas Médicas</h2>
+        <ul class="services-list">
+          <li>Programación fácil de citas</li>
+          <li>Consultas generales y especializadas</li>
+          <li>Telemedicina disponible</li>
+          <li>Recordatorios de citas automatizados</li>
+        </ul>
+      </div>
     </div>
 
-    <!-- MODAL DE REGISTRO DE CITAS -->
-    <div id="modalCita" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-btn" onclick="cerrarModalCita()">&times;</span>
-            <h2 style="margin-top:0;">Agendar Nueva Cita Médica</h2>
-            
-            <form id="formCita" onsubmit="guardarCita(event)">
-                <div class="form-group">
-                    <label for="idPaciente">ID Paciente:</label>
-                    <input type="number" id="idPaciente" required placeholder="Ej. 1">
-                </div>
+  </div>
+</div>
 
-                <div class="form-group">
-                    <label for="idDoctor">ID Doctor:</label>
-                    <input type="number" id="idDoctor" required placeholder="Ej. 2">
-                </div>
+<!-- Draggable stickers -->
+<div class="sticker s1" data-draggable="true" style="left:2.5vw;top:52vh">CITAS</div>
+<div class="sticker s2" data-draggable="true" style="left:2vw;top:67vh">USUARIOS</div>
+<div class="sticker s3" data-draggable="true" style="right:2vw;top:39vh">SALUD</div>
+<div class="sticker s4" data-draggable="true" style="right:1.5vw;top:76vh">ORDEN</div>
 
-                <div class="form-group">
-                    <label for="idUsuarioCreador">ID Usuario Creador:</label>
-                    <input type="number" id="idUsuarioCreador" required placeholder="Ej. 1">
-                </div>
+<!-- MODAL DE REGISTRO DE USUARIOS -->
+<div id="modalRegistro" class="modal-overlay">
+  <div class="modal-content">
+    <span class="close-btn" onclick="cerrarModal()" role="button" tabindex="0" aria-label="Cerrar ventana">&times;</span>
 
-                <div class="form-group">
-                    <label for="fechaHora">Fecha y Hora:</label>
-                    <input type="datetime-local" id="fechaHora" required>
-                </div>
+    <!-- PASO 1: Selección de Rol -->
+    <div id="pasoSeleccionRol">
+      <h2 style="margin-top:0;">¿Qué usuario deseas registrar?</h2>
+      <p style="color:#666;font-size:14px;">Selecciona una opción para continuar:</p>
 
-                <div class="form-group">
-                    <label for="motivo">Motivo de la Consulta:</label>
-                    <textarea id="motivo" rows="3" placeholder="Describe brevemente el síntoma o motivo..."></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button type="submit" class="btn-blue">Agendar Cita</button>
-                    <button type="button" class="btn-blue" style="background-color: #6c757d;" onclick="cerrarModalCita()">Cancelar</button>
-                </div>
-            </form>
-        </div>
+      <div class="role-buttons-grid">
+        <button class="btn-role" onclick="seleccionarRol('Paciente')">Paciente</button>
+        <button class="btn-role" onclick="seleccionarRol('Doctor')">Doctor</button>
+        <button class="btn-role" onclick="seleccionarRol('Administrador')">Administrador</button>
+        <button class="btn-role" onclick="seleccionarRol('Recepcionista')">Recepcionista</button>
+      </div>
     </div>
 
-    <!-- Script JavaScript -->
-    <script>
-        const CLAVE_ADMIN_CORRECTA = "admin123"; 
-        let rolSeleccionadoActual = "";
+    <!-- Verificación de Contraseña de Administrador -->
+    <div id="pasoClaveAdmin" style="display:none;">
+      <h2 style="margin-top:0;color:#d9534f;">Seguridad Requerida</h2>
+      <p style="color:#555;font-size:14px;">
+        Para registrar un <strong>Administrador</strong>, debes ingresar la contraseña de autorización del sistema:
+      </p>
 
-        // --- GESTIÓN DE MODAL DE USUARIOS ---
-        function abrirModalRegistro() {
-            document.getElementById('modalRegistro').style.display = 'flex';
-            volverASeleccion();
+      <div class="form-group">
+        <label for="claveAdmin">Contraseña de autorización:</label>
+        <input type="password" id="claveAdmin" placeholder="Ingresa la clave de admin">
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button class="btn-blue" onclick="validarClaveAdmin()">Verificar</button>
+        <button class="btn-blue" style="background-color:#6c757d;" onclick="volverASeleccion()">Volver</button>
+      </div>
+    </div>
+
+    <!-- Formulario de Registro de Información -->
+    <div id="pasoFormulario" style="display:none;">
+      <div class="badge-selected">Registrando: <span id="lblRolSeleccionado"></span></div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Nombre(s)">
+      </div>
+
+      <div class="form-group">
+        <label for="apellidoP">Apellido Paterno:</label>
+        <input type="text" id="apellidoP" placeholder="Apellido paterno">
+      </div>
+
+      <div class="form-group">
+        <label for="apellidoM">Apellido Materno:</label>
+        <input type="text" id="apellidoM" placeholder="Apellido materno">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo Electrónico:</label>
+        <input type="email" id="email" placeholder="ejemplo@correo.com">
+      </div>
+
+      <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" placeholder="Número telefónico">
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:15px;">
+        <button class="btn-blue" onclick="guardarUsuario()">Registrar</button>
+        <button class="btn-blue" style="background-color:#6c757d;" onclick="volverASeleccion()">Cambiar Rol</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE REGISTRO DE CITAS -->
+<div id="modalCita" class="modal-overlay">
+  <div class="modal-content">
+    <span class="close-btn" onclick="cerrarModalCita()" role="button" tabindex="0" aria-label="Cerrar ventana">&times;</span>
+    <h2 style="margin-top:0;">Agendar Nueva Cita Médica</h2>
+
+    <form id="formCita" onsubmit="guardarCita(event)">
+      <div class="form-group">
+        <label for="idPaciente">ID Paciente:</label>
+        <input type="number" id="idPaciente" required placeholder="Ej. 1">
+      </div>
+
+      <div class="form-group">
+        <label for="idDoctor">ID Doctor:</label>
+        <input type="number" id="idDoctor" required placeholder="Ej. 2">
+      </div>
+
+      <div class="form-group">
+        <label for="idUsuarioCreador">ID Usuario Creador:</label>
+        <input type="number" id="idUsuarioCreador" required placeholder="Ej. 1">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaHora">Fecha y Hora:</label>
+        <input type="datetime-local" id="fechaHora" required>
+      </div>
+
+      <div class="form-group">
+        <label for="motivo">Motivo de la Consulta:</label>
+        <textarea id="motivo" rows="3" placeholder="Describe brevemente el síntoma o motivo..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:15px;">
+        <button type="submit" class="btn-blue">Agendar Cita</button>
+        <button type="button" class="btn-blue" style="background-color:#6c757d;" onclick="cerrarModalCita()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Mixer -->
+<aside class="mixer" id="mixer" aria-label="Controles visuales">
+  <div class="mixer-head">
+    <span class="mixer-title">Dirección visual / mixer</span>
+    <button class="mixer-toggle" id="mixerToggle" type="button" aria-expanded="false" aria-controls="mixerBody">✦</button>
+  </div>
+  <div class="mixer-body" id="mixerBody">
+    <div class="theme-row">
+      <button class="theme-btn theme-btn-rise" type="button" data-theme-btn="rise">RISE</button>
+      <button class="theme-btn" type="button" data-theme-btn="organic">Organic</button>
+      <button class="theme-btn" type="button" data-theme-btn="riso">Riso</button>
+      <button class="theme-btn" type="button" data-theme-btn="sticker">Sticker</button>
+    </div>
+    <div class="grain-row">
+      <label for="grainSlider">Grano</label>
+      <input id="grainSlider" type="range" min="0" max="100" value="18" aria-label="Intensidad del grano">
+      <span class="grain-value" id="grainValue">18%</span>
+    </div>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =======================================================
+     Original application logic — preserved and kept global
+     ======================================================= */
+  const CLAVE_ADMIN_CORRECTA = "admin123";
+  let rolSeleccionadoActual = "";
+
+  window.abrirModalRegistro = function(){
+    document.getElementById('modalRegistro').style.display='flex';
+    volverASeleccion();
+    A11y.trapOpen(document.getElementById('modalRegistro'));
+  };
+
+  window.cerrarModal = function(){
+    document.getElementById('modalRegistro').style.display='none';
+    limpiarFormulario();
+    A11y.release();
+  };
+
+  window.volverASeleccion = function(){
+    document.getElementById('pasoSeleccionRol').style.display='block';
+    document.getElementById('pasoClaveAdmin').style.display='none';
+    document.getElementById('pasoFormulario').style.display='none';
+    document.getElementById('claveAdmin').value='';
+  };
+
+  window.seleccionarRol = function(rol){
+    rolSeleccionadoActual=rol;
+    if(rol==='Administrador'){
+      document.getElementById('pasoSeleccionRol').style.display='none';
+      document.getElementById('pasoClaveAdmin').style.display='block';
+      document.getElementById('claveAdmin').focus();
+    }else{
+      mostrarFormulario();
+    }
+  };
+
+  window.validarClaveAdmin = function(){
+    const claveIngresada=document.getElementById('claveAdmin').value;
+    if(claveIngresada===CLAVE_ADMIN_CORRECTA){
+      mostrarFormulario();
+    }else{
+      alert('Contraseña de autorización incorrecta. Acceso denegado.');
+      document.getElementById('claveAdmin').value='';
+    }
+  };
+
+  function mostrarFormulario(){
+    document.getElementById('pasoSeleccionRol').style.display='none';
+    document.getElementById('pasoClaveAdmin').style.display='none';
+    document.getElementById('pasoFormulario').style.display='block';
+    document.getElementById('lblRolSeleccionado').innerText=rolSeleccionadoActual;
+  }
+
+  window.guardarUsuario = function(){
+    const usuario={
+      rol:rolSeleccionadoActual,
+      nombre:document.getElementById('nombre').value,
+      apellidoPaterno:document.getElementById('apellidoP').value,
+      apellidoMaterno:document.getElementById('apellidoM').value,
+      correo:document.getElementById('email').value,
+      telefono:document.getElementById('telefono').value
+    };
+
+    if(!usuario.nombre.trim()){
+      alert('Por favor escribe al menos el nombre.');
+      return;
+    }
+
+    fetch('/api/usuarios',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(usuario)
+    })
+    .then(response=>{
+      if(!response.ok) throw new Error('Error al registrar usuario');
+      return response.json();
+    })
+    .then(()=>{
+      alert('¡'+rolSeleccionadoActual+' registrado exitosamente!');
+      cerrarModal();
+      const contenedor=document.getElementById('listaUsuarios');
+      if(contenedor.style.display!=='none') cargarUsuarios();
+    })
+    .catch(error=>{
+      console.error(error);
+      alert('Error al registrar el usuario');
+    });
+  };
+
+  function limpiarFormulario(){
+    document.getElementById('nombre').value='';
+    document.getElementById('apellidoP').value='';
+    document.getElementById('apellidoM').value='';
+    document.getElementById('email').value='';
+    document.getElementById('telefono').value='';
+    document.getElementById('claveAdmin').value='';
+    rolSeleccionadoActual='';
+  }
+
+  window.toggleListaUsuarios = function(){
+    const contenedor=document.getElementById('listaUsuarios');
+    const boton=document.getElementById('btnToggleLista');
+    if(contenedor.style.display==='block'){
+      contenedor.style.display='none';
+      boton.innerText='Cargar / Mostrar Lista';
+      boton.style.backgroundColor='#007bff';
+    }else{
+      cargarUsuarios();
+      contenedor.style.display='block';
+      boton.innerText='Ocultar Lista';
+      boton.style.backgroundColor='#6c757d';
+    }
+  };
+
+  function escapeHTML(value){
+    return String(value??'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  }
+
+  function cargarUsuarios(){
+    fetch('/api/usuarios')
+      .then(response=>{
+        if(!response.ok) throw new Error('Error al obtener la lista');
+        return response.json();
+      })
+      .then(data=>{
+        const contenedor=document.getElementById('listaUsuarios');
+        if(!data||data.length===0){
+          contenedor.innerHTML='<p style="margin-top:20px;">No hay usuarios registrados aún.</p>';
+          return;
         }
 
-        function cerrarModal() {
-            document.getElementById('modalRegistro').style.display = 'none';
-            limpiarFormulario();
-        }
+        const rolesConfig=[
+          {singular:'Administrador',plural:'Administradores'},
+          {singular:'Doctor',plural:'Doctores'},
+          {singular:'Paciente',plural:'Pacientes'},
+          {singular:'Recepcionista',plural:'Recepcionistas'}
+        ];
 
-        function volverASeleccion() {
-            document.getElementById('pasoSeleccionRol').style.display = 'block';
-            document.getElementById('pasoClaveAdmin').style.display = 'none';
-            document.getElementById('pasoFormulario').style.display = 'none';
-            document.getElementById('claveAdmin').value = '';
-        }
+        function generarHTMLRol(rolConfig){
+          const usuariosFiltrados=data.filter(u=>
+            u.rol&&u.rol.toLowerCase()===rolConfig.singular.toLowerCase()
+          );
 
-        function seleccionarRol(rol) {
-            rolSeleccionadoActual = rol;
-            if (rol === 'Administrador') {
-                document.getElementById('pasoSeleccionRol').style.display = 'none';
-                document.getElementById('pasoClaveAdmin').style.display = 'block';
-                document.getElementById('claveAdmin').focus();
-            } else {
-                mostrarFormulario();
-            }
-        }
+          let htmlRol=`
+            <div class="rol-section">
+              <h3>${rolConfig.plural}</h3>
+          `;
 
-        function validarClaveAdmin() {
-            const claveIngresada = document.getElementById('claveAdmin').value;
-            if (claveIngresada === CLAVE_ADMIN_CORRECTA) {
-                mostrarFormulario();
-            } else {
-                alert('Contraseña de autorización incorrecta. Acceso denegado.');
-                document.getElementById('claveAdmin').value = '';
-            }
-        }
-
-        function mostrarFormulario() {
-            document.getElementById('pasoSeleccionRol').style.display = 'none';
-            document.getElementById('pasoClaveAdmin').style.display = 'none';
-            document.getElementById('pasoFormulario').style.display = 'block';
-            document.getElementById('lblRolSeleccionado').innerText = rolSeleccionadoActual;
-        }
-
-        function guardarUsuario() {
-            const usuario = {
-                rol: rolSeleccionadoActual,
-                nombre: document.getElementById('nombre').value,
-                apellidoPaterno: document.getElementById('apellidoP').value,
-                apellidoMaterno: document.getElementById('apellidoM').value,
-                correo: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value
-            };
-
-            if (!usuario.nombre.trim()) {
-                alert('Por favor escribe al menos el nombre.');
-                return;
-            }
-
-            fetch('/api/usuarios', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(usuario)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Error al registrar usuario');
-                return response.json();
-            })
-            .then(data => {
-                alert('¡' + rolSeleccionadoActual + ' registrado exitosamente!');
-                cerrarModal();
-                
-                const contenedor = document.getElementById('listaUsuarios');
-                if (contenedor.style.display !== 'none') {
-                    cargarUsuarios();
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Error al registrar el usuario');
+          if(usuariosFiltrados.length===0){
+            htmlRol+=`<p class="empty-role">No hay ${rolConfig.plural.toLowerCase()} registrados.</p>`;
+          }else{
+            htmlRol+='<ul class="rol-list">';
+            usuariosFiltrados.forEach(u=>{
+              const nombre=u.nombre||'';
+              const apeP=u.apellidoPaterno||u.apellidoP||u.apellido_paterno||'';
+              const apeM=u.apellidoMaterno||u.apellidoM||u.apellido_materno||'';
+              const nombreCompleto=`${nombre} ${apeP} ${apeM}`.trim();
+              const correo=u.correo||u.email||'';
+              const textoCorreo=correo?` - ${correo}`:'';
+              htmlRol+=`<li><strong>${escapeHTML(nombreCompleto)}</strong>${escapeHTML(textoCorreo)}</li>`;
             });
+            htmlRol+='</ul>';
+          }
+          htmlRol+='</div>';
+          return htmlRol;
         }
 
-        function limpiarFormulario() {
-            document.getElementById('nombre').value = '';
-            document.getElementById('apellidoP').value = '';
-            document.getElementById('apellidoM').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('telefono').value = '';
-            document.getElementById('claveAdmin').value = '';
-            rolSeleccionadoActual = "";
+        let htmlFinal='';
+        rolesConfig.forEach(rol=>{htmlFinal+=generarHTMLRol(rol)});
+
+        const rolesSingulares=rolesConfig.map(r=>r.singular.toLowerCase());
+        const otrosUsuarios=data.filter(u=>
+          !u.rol||!rolesSingulares.includes(u.rol.toLowerCase())
+        );
+
+        if(otrosUsuarios.length>0){
+          htmlFinal+=`
+            <div class="rol-section">
+              <h3>Otros / Sin Rol</h3>
+              <ul class="rol-list">
+          `;
+          otrosUsuarios.forEach(u=>{
+            const nombreCompleto=`${u.nombre||''} ${u.apellidoPaterno||u.apellidoP||''}`.trim();
+            const correo=u.correo||u.email||'';
+            const textoCorreo=correo?` - ${correo}`:'';
+            htmlFinal+=`<li><strong>${escapeHTML(nombreCompleto)}</strong> (${escapeHTML(u.rol||'Sin Rol')})${escapeHTML(textoCorreo)}</li>`;
+          });
+          htmlFinal+='</ul></div>';
         }
 
-        function toggleListaUsuarios() {
-            const contenedor = document.getElementById('listaUsuarios');
-            const boton = document.getElementById('btnToggleLista');
+        contenedor.innerHTML=htmlFinal;
+        Motion.refresh();
+      })
+      .catch(error=>{
+        console.error(error);
+        document.getElementById('listaUsuarios').innerHTML='<p style="color:red;margin-top:20px;">Error al conectar con el servidor.</p>';
+      });
+  }
 
-            if (contenedor.style.display === 'block') {
-                contenedor.style.display = 'none';
-                boton.innerText = 'Cargar / Mostrar Lista';
-                boton.style.backgroundColor = '#007bff';
-            } else {
-                cargarUsuarios();
-                contenedor.style.display = 'block';
-                boton.innerText = 'Ocultar Lista';
-                boton.style.backgroundColor = '#6c757d';
-            }
+  window.abrirModalCita = function(){
+    document.getElementById('modalCita').style.display='flex';
+    A11y.trapOpen(document.getElementById('modalCita'));
+  };
+
+  window.cerrarModalCita = function(){
+    document.getElementById('modalCita').style.display='none';
+    document.getElementById('formCita').reset();
+    A11y.release();
+  };
+
+  window.guardarCita = function(event){
+    event.preventDefault();
+
+    const citaData={
+      idPaciente:parseInt(document.getElementById('idPaciente').value),
+      idDoctor:parseInt(document.getElementById('idDoctor').value),
+      idUsuarioCreador:parseInt(document.getElementById('idUsuarioCreador').value),
+      fechaHora:document.getElementById('fechaHora').value,
+      motivo:document.getElementById('motivo').value,
+      estado:'PROGRAMADA'
+    };
+
+    fetch('/api/citas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(citaData)
+    })
+    .then(response=>{
+      if(!response.ok) throw new Error('Error al agendar la cita');
+      return response.json();
+    })
+    .then(()=>{
+      alert('¡Cita agendada exitosamente!');
+      cerrarModalCita();
+      const contenedor=document.getElementById('listaCitas');
+      if(contenedor.style.display!=='none') cargarCitas();
+    })
+    .catch(error=>{
+      console.error(error);
+      alert('Error al conectar con el servidor para agendar la cita.');
+    });
+  };
+
+  window.toggleListaCitas = function(){
+    const contenedor=document.getElementById('listaCitas');
+    const boton=document.getElementById('btnToggleCitas');
+    if(contenedor.style.display==='grid'){
+      contenedor.style.display='none';
+      boton.innerText='Cargar / Mostrar Citas';
+      boton.style.backgroundColor='#007bff';
+    }else{
+      cargarCitas();
+      contenedor.style.display='grid';
+      boton.innerText='Ocultar Citas';
+      boton.style.backgroundColor='#6c757d';
+    }
+  };
+
+  function cargarCitas(){
+    fetch('/api/citas')
+      .then(response=>{
+        if(!response.ok) throw new Error('Error al obtener citas');
+        return response.json();
+      })
+      .then(citas=>{
+        const contenedor=document.getElementById('listaCitas');
+        contenedor.innerHTML='';
+
+        if(!citas||citas.length===0){
+          contenedor.innerHTML='<p style="margin-top:10px;color:#666;font-style:italic;">No hay citas agendadas aún.</p>';
+          return;
         }
 
-        function cargarUsuarios() {
-            fetch('/api/usuarios')
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al obtener la lista');
-                    return response.json();
-                })
-                .then(data => {
-                    const contenedor = document.getElementById('listaUsuarios');
-                    if (!data || data.length === 0) {
-                        contenedor.innerHTML = '<p style="margin-top:20px;">No hay usuarios registrados aún.</p>';
-                        return;
-                    }
-                    
-                    const rolesConfig = [
-                        { singular: 'Administrador', plural: 'Administradores' },
-                        { singular: 'Doctor', plural: 'Doctores' },
-                        { singular: 'Paciente', plural: 'Pacientes' },
-                        { singular: 'Recepcionista', plural: 'Recepcionistas' }
-                    ];
-                    
-                    function generarHTMLRol(rolConfig) {
-                        const usuariosFiltrados = data.filter(u => 
-                            u.rol && u.rol.toLowerCase() === rolConfig.singular.toLowerCase()
-                        );
+        citas.forEach(cita=>{
+          const fechaFormateada=cita.fechaHora?new Date(cita.fechaHora).toLocaleString('es-ES'):'Sin fecha';
+          contenedor.innerHTML+=`
+            <div class="card-cita">
+              <span class="badge-cita">${escapeHTML(cita.estado||'PROGRAMADA')}</span>
+              <strong>Cita #${escapeHTML(cita.idCita||cita.id||'')}</strong><br>
+              <small><strong>Paciente ID:</strong> ${escapeHTML(cita.idPaciente)}</small><br>
+              <small><strong>Doctor ID:</strong> ${escapeHTML(cita.idDoctor)}</small><br>
+              <small><strong>Fecha:</strong> ${escapeHTML(fechaFormateada)}</small>
+              ${cita.motivo?`<br><small><strong>Motivo:</strong> ${escapeHTML(cita.motivo)}</small>`:''}
+            </div>
+          `;
+        });
+        Motion.refresh();
+      })
+      .catch(error=>{
+        console.error(error);
+        document.getElementById('listaCitas').innerHTML='<p style="color:red;margin-top:10px;">Error al cargar la lista de citas.</p>';
+      });
+  }
 
-                        let htmlRol = `
-                            <div class="rol-section">
-                                <h3>${rolConfig.plural}</h3>
-                        `;
-
-                        if (usuariosFiltrados.length === 0) {
-                            htmlRol += `<p class="empty-role">No hay ${rolConfig.plural.toLowerCase()} registrados.</p>`;
-                        } else {
-                            htmlRol += '<ul class="rol-list">';
-                            usuariosFiltrados.forEach(u => {
-                                const nombre = u.nombre || '';
-                                const apeP = u.apellidoPaterno || u.apellidoP || u.apellido_paterno || '';
-                                const apeM = u.apellidoMaterno || u.apellidoM || u.apellido_materno || '';
-                                const nombreCompleto = `${nombre} ${apeP} ${apeM}`.trim();
-                                const correo = u.correo || u.email || '';
-                                const textoCorreo = correo ? ` - ${correo}` : '';
-
-                                htmlRol += `<li><strong>${nombreCompleto}</strong>${textoCorreo}</li>`;
-                            });
-                            htmlRol += '</ul>';
-                        }
-
-                        htmlRol += '</div>';
-                        return htmlRol;
-                    }
-
-                    let htmlFinal = '';
-                    rolesConfig.forEach(rol => {
-                        htmlFinal += generarHTMLRol(rol);
-                    });
-
-                    const rolesSingulares = rolesConfig.map(r => r.singular.toLowerCase());
-                    const otrosUsuarios = data.filter(u => 
-                        !u.rol || !rolesSingulares.includes(u.rol.toLowerCase())
-                    );
-
-                    if (otrosUsuarios.length > 0) {
-                        htmlFinal += `
-                            <div class="rol-section">
-                                <h3>Otros / Sin Rol</h3>
-                                <ul class="rol-list">
-                        `;
-                        otrosUsuarios.forEach(u => {
-                            const nombreCompleto = `${u.nombre || ''} ${u.apellidoPaterno || u.apellidoP || ''}`.trim();
-                            const correo = u.correo || u.email || '';
-                            const textoCorreo = correo ? ` - ${correo}` : '';
-                            htmlFinal += `<li><strong>${nombreCompleto}</strong> (${u.rol || 'Sin Rol'})${textoCorreo}</li>`;
-                        });
-                        htmlFinal += '</ul></div>';
-                    }
-
-                    contenedor.innerHTML = htmlFinal;
-                })
-                .catch(error => {
-                    console.error(error);
-                    document.getElementById('listaUsuarios').innerHTML = '<p style="color: red; margin-top:20px;">Error al conectar con el servidor.</p>';
-                });
+  /* =======================================================
+     Theme
+     ======================================================= */
+  const Theme={
+    current:document.documentElement.dataset.theme||'organic',
+    themes:['rise','organic','riso','sticker'],
+    init(){
+      document.querySelectorAll('[data-theme-btn]').forEach(btn=>{
+        btn.addEventListener('click',()=>this.set(btn.dataset.themeBtn));
+      });
+    },
+    set(theme){
+      if(!this.themes.includes(theme)) return;
+      const apply=()=>{
+        document.documentElement.dataset.theme=theme;
+        this.current=theme;
+      };
+      try{
+        if(document.startViewTransition) document.startViewTransition(apply);
+        else{
+          document.documentElement.classList.add('theme-fade');
+          apply();
+          setTimeout(()=>document.documentElement.classList.remove('theme-fade'),220);
         }
+      }catch(e){apply()}
+    },
+    cycle(){
+      const i=this.themes.indexOf(this.current);
+      this.set(this.themes[(i+1)%this.themes.length]);
+    },
+    destroy(){}
+  };
 
-        // --- GESTIÓN DE CITAS MÉDICAS ---
-        function abrirModalCita() {
-            document.getElementById('modalCita').style.display = 'flex';
+  /* =======================================================
+     Grain
+     ======================================================= */
+  const Grain={
+    slider:null,
+    init(){
+      this.slider=document.getElementById('grainSlider');
+      const value=document.getElementById('grainValue');
+      const update=()=>{
+        const v=Number(this.slider.value);
+        document.documentElement.style.setProperty('--grain',(v/100).toFixed(2));
+        document.documentElement.style.setProperty('--grain-size',Math.round(250-v*1.5)+'px');
+        value.textContent=v+'%';
+      };
+      this.slider.addEventListener('input',update);
+      update();
+    },
+    toggle(){
+      const current=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--grain'))||0;
+      document.documentElement.style.setProperty('--grain',current>.01?'0':'.18');
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     Loader
+     ======================================================= */
+  const Loader={
+    init(){
+      const el=document.getElementById('loader');
+      const count=document.getElementById('loaderCount');
+      if(!el){return}
+      const reduce=Motion.reduced();
+      if(reduce){
+        el.style.display='none';
+        return;
+      }
+      let n=0;
+      const start=performance.now();
+      const tick=now=>{
+        const p=Math.min(1,(now-start)/1400);
+        n=Math.round(100*(1-Math.pow(1-p,3)));
+        count.textContent=n;
+        if(p<1) requestAnimationFrame(tick);
+        else{
+          setTimeout(()=>{
+            el.style.transition='opacity .35s ease,transform .6s var(--ease-out)';
+            el.style.opacity='0';
+            el.style.transform='translateY(-5%)';
+            setTimeout(()=>{el.remove()},450);
+          },180);
         }
+      };
+      requestAnimationFrame(tick);
+    },
+    destroy(){}
+  };
 
-        function cerrarModalCita() {
-            document.getElementById('modalCita').style.display = 'none';
-            document.getElementById('formCita').reset();
+  /* =======================================================
+     Cursor
+     ======================================================= */
+  const Cursor={
+    el:null,label:null,enabled:false,
+    x:0,y:0,tx:0,ty:0,
+    init(){
+      this.el=document.getElementById('customCursor');
+      this.label=this.el?.querySelector('.cursor-label');
+      this.enabled=window.matchMedia('(hover:hover) and (pointer:fine)').matches && !Motion.reduced();
+      if(!this.enabled)return;
+      this.el.classList.add('active');
+      window.addEventListener('pointermove',e=>{
+        this.tx=e.clientX;this.ty=e.clientY;
+      },{passive:true});
+      document.addEventListener('pointerover',e=>{
+        const target=e.target.closest('button,a,input,textarea,select,[data-draggable]');
+        if(target){
+          this.el.classList.add('big');
+          this.label.textContent=target.matches('[data-draggable]')?'ARRASTRA':'ABRIR';
         }
-
-        function guardarCita(event) {
-            event.preventDefault();
-
-            const citaData = {
-                idPaciente: parseInt(document.getElementById('idPaciente').value),
-                idDoctor: parseInt(document.getElementById('idDoctor').value),
-                idUsuarioCreador: parseInt(document.getElementById('idUsuarioCreador').value),
-                fechaHora: document.getElementById('fechaHora').value,
-                motivo: document.getElementById('motivo').value,
-                estado: 'PROGRAMADA'
-            };
-
-            fetch('/api/citas', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(citaData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Error al agendar la cita');
-                return response.json();
-            })
-            .then(data => {
-                alert('¡Cita agendada exitosamente!');
-                cerrarModalCita();
-
-                // Si la lista de citas está abierta, refrescarla
-                const contenedor = document.getElementById('listaCitas');
-                if (contenedor.style.display !== 'none') {
-                    cargarCitas();
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Error al conectar con el servidor para agendar la cita.');
-            });
+      });
+      document.addEventListener('pointerout',e=>{
+        if(e.target.closest('button,a,input,textarea,select,[data-draggable]')){
+          this.el.classList.remove('big');
+          this.label.textContent='';
         }
+      });
+    },
+    frame(){
+      if(!this.enabled)return;
+      this.x+=(this.tx-this.x)*.22;
+      this.y+=(this.ty-this.y)*.22;
+      this.el.style.transform=`translate3d(${this.x}px,${this.y}px,0) ${this.el.classList.contains('big')?'scale(3.2)':'scale(1)'}`;
+    },
+    destroy(){}
+  };
 
-        function toggleListaCitas() {
-            const contenedor = document.getElementById('listaCitas');
-            const boton = document.getElementById('btnToggleCitas');
+  /* =======================================================
+     Ink
+     ======================================================= */
+  const Ink={
+    colors:['#4FD1B0','#D8F53A','#6B4BFF','#FF5FB0','#FF7A00','#1F4BFF'],
+    init(){
+      document.addEventListener('click',e=>{
+        if(e.target.closest('button,a,input,textarea,select,.modal-content,.mixer,[data-draggable]'))return;
+        this.stamp(e.clientX,e.clientY);
+      });
+    },
+    stamp(x,y){
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.classList.add('ink-stamp');
+      svg.style.left=(x-45)+'px';
+      svg.style.top=(y-45)+'px';
+      svg.style.setProperty('--rot',(Math.random()*50-25)+'deg');
+      svg.innerHTML=`<path fill="${this.colors[Math.floor(Math.random()*this.colors.length)]}" d="M46 4c15 1 26 10 35 22 8 11 8 26 1 38-7 13-18 20-32 22-16 2-29-4-39-16C2 58 0 45 5 31 10 16 26 2 46 4Z"/>`;
+      document.body.appendChild(svg);
+      setTimeout(()=>svg.remove(),2700);
+    },
+    destroy(){}
+  };
 
-            if (contenedor.style.display === 'grid') {
-                contenedor.style.display = 'none';
-                boton.innerText = 'Cargar / Mostrar Citas';
-                boton.style.backgroundColor = '#007bff';
-            } else {
-                cargarCitas();
-                contenedor.style.display = 'grid';
-                boton.innerText = 'Ocultar Citas';
-                boton.style.backgroundColor = '#6c757d';
-            }
+  /* =======================================================
+     Ribbon
+     ======================================================= */
+  const Ribbon={
+    path:null,
+    init(){
+      this.path=document.getElementById('heroRibbonPath');
+      if(!this.path)return;
+      const len=this.path.getTotalLength();
+      this.path.style.strokeDasharray=len;
+      this.path.style.strokeDashoffset=len;
+      if(Motion.reduced()){
+        this.path.style.strokeDashoffset='0';
+        return;
+      }
+      if(window.gsap && window.ScrollTrigger){
+        gsap.to(this.path,{strokeDashoffset:0,duration:2.1,ease:'power3.inOut'});
+        gsap.to(this.path,{strokeDashoffset:len*.35,ease:'none',scrollTrigger:{
+          trigger:'.main-title',start:'top top',end:'bottom top',scrub:1
+        }});
+        const textPath=document.querySelector('.ribbon-text textPath');
+        if(textPath){
+          gsap.to(textPath,{attr:{startOffset:'55%'},duration:3,ease:'power2.inOut',repeat:-1,yoyo:true});
         }
+      }else{
+        this.path.style.strokeDashoffset='0';
+      }
+    },
+    destroy(){}
+  };
 
-        function cargarCitas() {
-            fetch('/api/citas')
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al obtener citas');
-                    return response.json();
-                })
-                .then(citas => {
-                    const contenedor = document.getElementById('listaCitas');
-                    contenedor.innerHTML = '';
+  /* =======================================================
+     Blobs
+     ======================================================= */
+  const Blobs={
+    init(){
+      document.querySelectorAll('.main-title').forEach(el=>{
+        el.addEventListener('pointermove',e=>{
+          if(Motion.reduced())return;
+          const r=el.getBoundingClientRect();
+          const x=(e.clientX-r.left)/r.width-.5;
+          const y=(e.clientY-r.top)/r.height-.5;
+          el.style.setProperty('--mx',x.toFixed(3));
+          el.style.setProperty('--my',y.toFixed(3));
+        });
+      });
+    },
+    destroy(){}
+  };
 
-                    if (!citas || citas.length === 0) {
-                        contenedor.innerHTML = '<p style="margin-top:10px; color:#666; font-style:italic;">No hay citas agendadas aún.</p>';
-                        return;
-                    }
+  /* =======================================================
+     SplitText
+     ======================================================= */
+  const SplitText={
+    init(){
+      document.querySelectorAll('.hero-title-text').forEach(el=>this.split(el));
+    },
+    split(el){
+      if(el.dataset.splitDone)return;
+      const original=el.textContent;
+      el.setAttribute('aria-label',original);
+      el.dataset.splitDone='true';
+      const parts=original.split(' ');
+      el.innerHTML=parts.map(word=>`<span class="char-wrap" aria-hidden="true">${[...word].map(c=>`<span class="char">${c}</span>`).join('')}</span>&nbsp;`).join('');
+      if(Motion.reduced()){
+        el.querySelectorAll('.char').forEach(c=>{c.style.opacity='1';c.style.transform='none'});
+        return;
+      }
+      if(window.gsap){
+        gsap.to(el.querySelectorAll('.char'),{
+          y:0,rotation:0,opacity:1,duration:.8,ease:'power4.out',stagger:.025,delay:.35
+        });
+      }else{
+        el.querySelectorAll('.char').forEach(c=>{c.style.opacity='1';c.style.transform='none'});
+      }
+    },
+    destroy(){}
+  };
 
-                    citas.forEach(cita => {
-                        const fechaFormateada = cita.fechaHora ? new Date(cita.fechaHora).toLocaleString('es-ES') : 'Sin fecha';
-                        contenedor.innerHTML += `
-                            <div class="card-cita">
-                                <span class="badge-cita">${cita.estado || 'PROGRAMADA'}</span>
-                                <strong>Cita #${cita.idCita || cita.id}</strong><br>
-                                <small><strong>Paciente ID:</strong> ${cita.idPaciente}</small><br>
-                                <small><strong>Doctor ID:</strong> ${cita.idDoctor}</small><br>
-                                <small><strong>Fecha:</strong> ${fechaFormateada}</small>
-                                ${cita.motivo ? `<br><small><strong>Motivo:</strong> ${cita.motivo}</small>` : ''}
-                            </div>
-                        `;
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    document.getElementById('listaCitas').innerHTML = '<p style="color: red; margin-top:10px;">Error al cargar la lista de citas.</p>';
-                });
+  /* =======================================================
+     Magnetic
+     ======================================================= */
+  const Magnetic={
+    items:[],
+    init(){
+      if(Motion.reduced())return;
+      document.querySelectorAll('.magnetic').forEach(el=>{
+        const move=e=>{
+          const r=el.getBoundingClientRect();
+          const x=(e.clientX-(r.left+r.width/2))/r.width;
+          const y=(e.clientY-(r.top+r.height/2))/r.height;
+          if(Math.abs(x)<.8&&Math.abs(y)<.8) el.style.transform=`translate(${x*12}px,${y*10}px)`;
+        };
+        const leave=()=>el.style.transform='';
+        el.addEventListener('pointermove',move);
+        el.addEventListener('pointerleave',leave);
+        this.items.push([el,move,leave]);
+      });
+    },
+    destroy(){
+      this.items.forEach(([el,m,l])=>{el.removeEventListener('pointermove',m);el.removeEventListener('pointerleave',l)});
+      this.items=[];
+    }
+  };
+
+  /* =======================================================
+     Tilt
+     ======================================================= */
+  const Tilt={
+    init(){
+      if(Motion.reduced())return;
+      document.querySelectorAll('.card-cita,.doctor-art').forEach(el=>{
+        el.addEventListener('pointermove',e=>{
+          const r=el.getBoundingClientRect();
+          const x=(e.clientX-r.left)/r.width-.5;
+          const y=(e.clientY-r.top)/r.height-.5;
+          el.style.transform=`perspective(900px) rotateX(${(-y*5).toFixed(2)}deg) rotateY(${(x*5).toFixed(2)}deg) translateY(-3px)`;
+        });
+        el.addEventListener('pointerleave',()=>el.style.transform='');
+      });
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     Stickers
+     ======================================================= */
+  const Stickers={
+    items:[],
+    init(){
+      document.querySelectorAll('.sticker[data-draggable]').forEach(el=>this.bind(el));
+    },
+    bind(el){
+      let dragging=false,ox=0,oy=0,vx=0,vy=0,lastX=0,lastY=0;
+      const down=e=>{
+        dragging=true;el.classList.add('dragging');
+        const r=el.getBoundingClientRect();
+        ox=e.clientX-r.left;oy=e.clientY-r.top;lastX=e.clientX;lastY=e.clientY;
+        el.setPointerCapture?.(e.pointerId);
+      };
+      const move=e=>{
+        if(!dragging)return;
+        const x=e.clientX-ox,y=e.clientY-oy;
+        vx=e.clientX-lastX;vy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
+        const maxX=innerWidth-el.offsetWidth,maxY=innerHeight-el.offsetHeight;
+        el.style.left=Math.max(0,Math.min(maxX,x))+'px';
+        el.style.top=Math.max(0,Math.min(maxY,y))+'px';
+        el.style.right='auto';
+      };
+      const up=()=>{
+        dragging=false;el.classList.remove('dragging');
+        vx*=.94;vy*=.94;
+        let steps=0;
+        const inertia=()=>{
+          if(dragging||steps++>35)return;
+          let x=el.offsetLeft+vx,y=el.offsetTop+vy;
+          const maxX=innerWidth-el.offsetWidth,maxY=innerHeight-el.offsetHeight;
+          if(x<0||x>maxX){vx*=-.6;x=Math.max(0,Math.min(maxX,x))}
+          if(y<0||y>maxY){vy*=-.6;y=Math.max(0,Math.min(maxY,y))}
+          vx*=.94;vy*=.94;
+          el.style.left=x+'px';el.style.top=y+'px';el.style.right='auto';
+          requestAnimationFrame(inertia);
+        };
+        requestAnimationFrame(inertia);
+      };
+      const dbl=()=>{el.animate([{transform:getComputedStyle(el).transform},{transform:'rotate(360deg)'},{transform:getComputedStyle(el).transform}],{duration:650,easing:'cubic-bezier(.16,1,.3,1)'})};
+      el.addEventListener('pointerdown',down);
+      el.addEventListener('pointermove',move);
+      el.addEventListener('pointerup',up);
+      el.addEventListener('pointercancel',up);
+      el.addEventListener('dblclick',dbl);
+      this.items.push([el,down,move,up,dbl]);
+    },
+    destroy(){this.items=[]}
+  };
+
+  /* =======================================================
+     Marquee / Scroll progress
+     ======================================================= */
+  const Marquee={
+    lastY:window.scrollY,
+    velocity:0,
+    init(){
+      window.addEventListener('scroll',()=>{
+        const y=window.scrollY;
+        this.velocity+=(y-this.lastY-this.velocity)*.08;
+        this.lastY=y;
+      },{passive:true});
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     Counters
+     ======================================================= */
+  const Counters={
+    init(){},
+    destroy(){}
+  };
+
+  /* =======================================================
+     Confetti
+     ======================================================= */
+  const Confetti={
+    colors:['#4FD1B0','#D8F53A','#FF5FB0','#6B4BFF','#FF7A00','#1F4BFF'],
+    burst(x,y){
+      if(Motion.reduced())return;
+      for(let i=0;i<12;i++){
+        const p=document.createElement('span');
+        p.className='confetti-piece';
+        p.style.background=this.colors[i%this.colors.length];
+        p.style.left=x+'px';p.style.top=y+'px';
+        document.body.appendChild(p);
+        const a=Math.random()*Math.PI*2,s=3+Math.random()*6;
+        const dx=Math.cos(a)*s*24,dy=Math.sin(a)*s*24+90;
+        p.animate([
+          {transform:'translate(0,0) rotate(0deg)',opacity:1},
+          {transform:`translate(${dx}px,${dy}px) rotate(${180+Math.random()*360}deg)`,opacity:0}
+        ],{duration:700+Math.random()*400,easing:'cubic-bezier(.16,1,.3,1)'});
+        setTimeout(()=>p.remove(),1200);
+      }
+    },
+    init(){
+      document.addEventListener('click',e=>{
+        const btn=e.target.closest('button');
+        if(btn&&!btn.classList.contains('mixer-toggle'))this.burst(e.clientX,e.clientY);
+      });
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     Shortcuts / Easter egg
+     ======================================================= */
+  const Shortcuts={
+    buffer:'',
+    konami:[38,38,40,40,37,39,37,39,66,65],
+    seq:[],
+    init(){
+      document.addEventListener('keydown',e=>{
+        if(e.target.matches('input,textarea,select'))return;
+        if(e.key.toLowerCase()==='t')Theme.cycle();
+        if(e.key.toLowerCase()==='g')Grain.toggle();
+        if(e.key.toLowerCase()==='m')document.documentElement.classList.toggle('reduced-motion');
+        if(e.key==='?')document.getElementById('mixer').classList.add('open');
+
+        this.buffer=(this.buffer+e.key.toLowerCase()).slice(-5);
+        if(this.buffer==='papel')this.rain();
+        this.seq.push(e.keyCode);this.seq=this.seq.slice(-10);
+        if(this.seq.join(',')===this.konami.join(','))this.rain();
+      });
+      document.addEventListener('keyup',e=>{
+        if(e.key==='?')document.getElementById('mixer').classList.remove('open');
+      });
+    },
+    rain(){
+      if(Motion.reduced())return;
+      const colors=['#4FD1B0','#D8F53A','#FF5FB0','#6B4BFF','#FF7A00','#FFE83A'];
+      for(let i=0;i<28;i++){
+        const s=document.createElement('span');
+        s.className='confetti-piece';
+        s.style.background=colors[i%colors.length];
+        s.style.left=Math.random()*100+'vw';s.style.top='-20px';
+        s.style.width=(6+Math.random()*10)+'px';s.style.height=(6+Math.random()*14)+'px';
+        document.body.appendChild(s);
+        s.animate([
+          {transform:'translateY(0) rotate(0)',opacity:1},
+          {transform:`translate(${(Math.random()-.5)*160}px,${innerHeight+80}px) rotate(${Math.random()*720}deg)`,opacity:.1}
+        ],{duration:2200+Math.random()*1600,easing:'cubic-bezier(.16,.7,.2,1)'});
+        setTimeout(()=>s.remove(),4200);
+      }
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     A11y
+     ======================================================= */
+  const A11y={
+    lastFocus:null,
+    trapOpen(modal){
+      this.lastFocus=document.activeElement;
+      const focusable=modal.querySelector('button,input,textarea,select,[tabindex]:not([tabindex="-1"])');
+      focusable?.focus();
+    },
+    release(){this.lastFocus?.focus?.();this.lastFocus=null},
+    init(){
+      document.querySelectorAll('.close-btn').forEach(btn=>{
+        btn.addEventListener('keydown',e=>{
+          if(e.key==='Enter'||e.key===' ')btn.click();
+        });
+      });
+      document.querySelectorAll('.modal-overlay').forEach(modal=>{
+        modal.addEventListener('click',e=>{
+          if(e.target===modal){
+            if(modal.id==='modalRegistro')cerrarModal();
+            if(modal.id==='modalCita')cerrarModalCita();
+          }
+        });
+      });
+      document.addEventListener('keydown',e=>{
+        if(e.key==='Escape'){
+          const a=document.getElementById('modalRegistro');
+          const b=document.getElementById('modalCita');
+          if(a.style.display==='flex')cerrarModal();
+          if(b.style.display==='flex')cerrarModalCita();
         }
-    </script>
+      });
+    },
+    destroy(){}
+  };
+
+  /* =======================================================
+     Motion coordinator
+     ======================================================= */
+  const Motion={
+    reduced(){
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        document.documentElement.classList.contains('reduced-motion');
+    },
+    init(){
+      if(window.gsap && window.ScrollTrigger && !this.reduced()){
+        gsap.registerPlugin(ScrollTrigger);
+        document.querySelectorAll('.reveal').forEach(el=>{
+          gsap.fromTo(el,{y:28,opacity:0},{y:0,opacity:1,duration:.8,ease:'power4.out',scrollTrigger:{
+            trigger:el,start:'top 88%',once:true
+          }});
+        });
+        document.querySelectorAll('.panel').forEach(el=>{
+          ScrollTrigger.create({
+            trigger:el,
+            start:'top 95%',
+            onEnter:()=>el.style.willChange='transform,opacity',
+            onLeave:()=>el.style.willChange='auto',
+            onEnterBack:()=>el.style.willChange='transform,opacity'
+          });
+        });
+      }else{
+        document.querySelectorAll('.reveal').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+      }
+    },
+    refresh(){
+      try{if(window.ScrollTrigger)ScrollTrigger.refresh()}catch(e){}
+    }
+  };
+
+  /* =======================================================
+     Global RAF + scroll progress
+     ======================================================= */
+  let rafId=0;
+  function globalFrame(){
+    Cursor.frame();
+    const max=document.documentElement.scrollHeight-innerHeight;
+    const p=max>0?Math.min(1,Math.max(0,scrollY/max)):0;
+    document.getElementById('scrollProgress').style.transform=`scaleY(${p})`;
+    rafId=requestAnimationFrame(globalFrame);
+  }
+
+  /* =======================================================
+     Bootstrap — modules fail silently so original app logic
+     never depends on the enhancement layer.
+     ======================================================= */
+  const modules=[Theme,Grain,Loader,Cursor,Ink,Ribbon,Blobs,SplitText,Magnetic,Tilt,Stickers,Marquee,Counters,Confetti,Shortcuts,A11y,Motion];
+
+  function safeInit(mod){
+    try{mod.init()}catch(err){console.warn('Visual module:',err)}
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    modules.forEach(safeInit);
+
+    const mixer=document.getElementById('mixer');
+    const toggle=document.getElementById('mixerToggle');
+    toggle.addEventListener('click',()=>{
+      const open=mixer.classList.toggle('open');
+      toggle.setAttribute('aria-expanded',String(open));
+    });
+
+    // Automatic visual status on buttons without changing their original handlers.
+    document.querySelectorAll('.btn-blue').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        btn.animate(
+          [{transform:'translate(0,0)'},{transform:'translate(-2px,1px)'},{transform:'translate(2px,-1px)'},{transform:'translate(0,0)'}],
+          {duration:180}
+        );
+      });
+    });
+
+    globalFrame();
+
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){
+        cancelAnimationFrame(rafId);
+        try{gsap?.globalTimeline?.pause()}catch(e){}
+      }else{
+        try{gsap?.globalTimeline?.resume()}catch(e){}
+        rafId=requestAnimationFrame(globalFrame);
+      }
+    });
+  });
+
+})();
+
+
+
+  /* =======================================================
+     RISE 2.0 — Editorial motion / counters / botanical field
+     ======================================================= */
+  const RiseExperience={
+    observer:null,
+    counters:null,
+    init(){
+      try{
+        const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('reduced-motion');
+        const items=document.querySelectorAll('.rise-print');
+        if(reduced){items.forEach(el=>el.classList.add('is-visible'));}
+        else{
+          this.observer=new IntersectionObserver((entries)=>{
+            entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');this.observer.unobserve(entry.target)}});
+          },{threshold:.12,rootMargin:'0px 0px -7% 0px'});
+          items.forEach(el=>this.observer.observe(el));
+        }
+        this.initCounters(reduced);
+        this.initPointerDoodles(reduced);
+      }catch(e){console.warn('RISE motion fallback',e)}
+    },
+    initCounters(reduced){
+      const els=document.querySelectorAll('[data-rise-counter]');
+      if(!els.length)return;
+      const run=el=>{
+        const target=Number(el.dataset.riseCounter)||0;
+        if(reduced){el.textContent=target;return}
+        const start=performance.now(),dur=1100;
+        const tick=now=>{
+          const p=Math.min(1,(now-start)/dur), eased=1-Math.pow(1-p,4);
+          el.textContent=Math.round(target*eased);
+          if(p<1)requestAnimationFrame(tick);else{el.textContent=target;el.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.16,1,.3,1)'})}
+        };
+        requestAnimationFrame(tick);
+      };
+      const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){run(e.target);obs.unobserve(e.target)}}),{threshold:.6});
+      els.forEach(el=>obs.observe(el));
+    },
+    initPointerDoodles(reduced){
+      if(reduced || !window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+      document.querySelectorAll('.rise-step,.rise-mini-card,.rise-principle').forEach(card=>{
+        card.addEventListener('pointermove',e=>{
+          const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+          card.style.setProperty('--rx',`${y*-2}deg`);card.style.setProperty('--ry',`${x*2}deg`);
+        });
+        card.addEventListener('pointerleave',()=>{card.style.setProperty('--rx','0deg');card.style.setProperty('--ry','0deg')});
+      });
+    },
+    destroy(){if(this.observer)this.observer.disconnect()}
+  };
+  RiseExperience.init();
+
+  /* =======================================================
+     RISE Botanical Doodles — lightweight interactive leaves
+     ======================================================= */
+  const RiseBotanics={
+    leaves:[],
+    raf:0,
+    paused:false,
+    init(){
+      this.field=document.querySelector('.rise-leaf-field');
+      if(!this.field) return;
+      const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(!reduced){
+        for(let i=0;i<9;i++) this.addLeaf(i);
+        this.tick();
+      }
+      document.querySelectorAll('.doodle-card').forEach(card=>{
+        const doodle=card.querySelector('.plant-doodle');
+        card.addEventListener('pointerenter',()=>{ if(doodle) doodle.style.transform='rotate(8deg) translateY(-4px) scale(1.08)'; });
+        card.addEventListener('pointerleave',()=>{ if(doodle) doodle.style.transform=''; });
+        card.addEventListener('focus',()=>{ if(doodle) doodle.style.transform='rotate(8deg) translateY(-4px) scale(1.08)'; });
+        card.addEventListener('blur',()=>{ if(doodle) doodle.style.transform=''; });
+        card.addEventListener('click',()=>{ card.classList.remove('doodle-pop'); void card.offsetWidth; card.classList.add('doodle-pop'); });
+      });
+      document.addEventListener('visibilitychange',()=>{this.paused=document.hidden});
+    },
+    addLeaf(i){
+      const el=document.createElement('span');
+      el.className='rise-leaf';
+      el.innerHTML='<svg viewBox="0 0 24 44"><path class="fill" d="M12 41 C12 28 10 16 12 4"/><path d="M12 29 C6 26 3 21 4 16 C10 16 13 20 12 29Z"/><path d="M12 22 C17 20 21 15 20 10 C15 10 12 14 12 22Z"/></svg>';
+      const x=Math.random()*96+2, y=Math.random()*82+6;
+      el.style.left=x+'%'; el.style.top=y+'%'; el.dataset.baseX=x; el.dataset.baseY=y;
+      el.dataset.phase=(Math.random()*Math.PI*2).toFixed(2); el.dataset.speed=(.12+Math.random()*.12).toFixed(3);
+      el.dataset.drift=(8+Math.random()*18).toFixed(1); el.dataset.rot=(Math.random()*18-9).toFixed(1);
+      this.field.appendChild(el); this.leaves.push(el);
+    },
+    tick(){
+      if(!this.paused){
+        const t=performance.now()/1000;
+        this.leaves.forEach(el=>{
+          const phase=parseFloat(el.dataset.phase), speed=parseFloat(el.dataset.speed), drift=parseFloat(el.dataset.drift), rot=parseFloat(el.dataset.rot);
+          const x=Math.sin(t*speed+phase)*drift;
+          const y=Math.cos(t*speed*.75+phase)*5;
+          const r=rot+Math.sin(t*speed+phase)*7;
+          el.style.transform=`translate3d(${x}px,${y}px,0) rotate(${r}deg)`;
+        });
+      }
+      this.raf=requestAnimationFrame(()=>this.tick());
+    },
+    destroy(){cancelAnimationFrame(this.raf);this.leaves=[]}
+  };
+  RiseBotanics.init();
+</script>
 </body>
 </html>
