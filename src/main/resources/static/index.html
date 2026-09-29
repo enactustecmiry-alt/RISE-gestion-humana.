@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Hospitalaria</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+
+        h1.main-title {
+            color: #0056b3;
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-column {
+            width: 380px;
+        }
+
+        .panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .panel h2, .panel h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .btn-blue {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-blue:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-toggle {
+            transition: background-color 0.3s;
+        }
+
+        .doctor-panel {
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .doctor-panel img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .doctor-panel h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .services-list {
+            text-align: left;
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .services-list li::before {
+            content: "• ";
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .rol-section {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #fafafa;
+            border: 1px solid #eaeaea;
+        }
+
+        .rol-section h3 {
+            font-size: 16px;
+            margin: 0 0 10px 0;
+            color: #0056b3;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .rol-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .rol-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .rol-list li:last-child {
+            border-bottom: none;
+        }
+
+        .empty-role {
+            font-size: 13px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 22px;
+            cursor: pointer;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .role-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .btn-role {
+            padding: 12px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-role:hover {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .badge-selected {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .grid-citas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .card-cita {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid #e2e8f0;
+            border-left-width: 4px;
+        }
+
+        .card-cita strong {
+            color: #0056b3;
+        }
+
+        .badge-cita {
+            background-color: #28a745;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Sistema de Gestión Hospitalaria</h1>
+
+    <div class="container">
+
+        <div class="left-column">
+            
+            <!-- Panel de Acción: Botón para abrir Modal de Registro -->
+            <div class="panel">
+                <h2>Gestión de Usuarios</h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Haz clic en el siguiente botón para dar de alta a un nuevo integrante en el sistema.</p>
+                <button class="btn-blue" onclick="abrirModalRegistro()">+ Registrar Nuevo Usuario</button>
+            </div>
+
+            <!-- Panel: Lista de Usuarios -->
+            <div class="panel">
+                <h2>Lista de Usuarios Registrados</h2>
+                <!-- Botón de Alternar Lista (Abrir/Cerrar) -->
+                <button id="btnToggleLista" class="btn-blue btn-toggle" onclick="toggleListaUsuarios()">Cargar / Mostrar Lista</button>
+                <div id="listaUsuarios" style="margin-top: 10px; display: none;">
+
+                </div>
+            </div>
+
+            <!-- Panel: Agendar Nueva Cita -->
+            <div class="panel">
+                <h2>Agendar Nueva Cita</h2>
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Haz clic en el siguiente botón para agendar una nueva cita médica en el sistema.</p>
+                <button class="btn-blue" onclick="abrirModalCita()">Agendar Nueva Cita</button>
+            </div>
+
+            <!-- Panel: Lista de Citas Médicas -->
+            <div class="panel">
+                <h2>Citas Médicas Agendadas</h2>
+                <button id="btnToggleCitas" class="btn-blue btn-toggle" onclick="toggleListaCitas()">Cargar / Mostrar Citas</button>
+                <div id="listaCitas" class="grid-citas" style="display: none;">
+                    <!-- Se carga dinámicamente -->
+                </div>
+            </div>
+
+        </div>
+
+        <div class="right-column">
+            <div class="panel doctor-panel">
+                <img src="https://i.pinimg.com/736x/37/25/1e/37251eab10cb27e8b11515a3c78ce64d.jpg" alt="Médico">
+                <h2>Servicios de Citas Médicas</h2>
+                <ul class="services-list">
+                    <li>Programación fácil de citas</li>
+                    <li>Consultas generales y especializadas</li>
+                    <li>Telemedicina disponible</li>
+                    <li>Recordatorios de citas automatizados</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE REGISTRO DE USUARIOS -->
+    <div id="modalRegistro" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            
+            <!-- PASO 1: Selección de Rol -->
+            <div id="pasoSeleccionRol">
+                <h2 style="margin-top:0;">¿Qué usuario deseas registrar?</h2>
+                <p style="color: #666; font-size: 14px;">Selecciona una opción para continuar:</p>
+                
+                <div class="role-buttons-grid">
+                    <button class="btn-role" onclick="seleccionarRol('Paciente')">Paciente</button>
+                    <button class="btn-role" onclick="seleccionarRol('Doctor')">Doctor</button>
+                    <button class="btn-role" onclick="seleccionarRol('Administrador')">Administrador</button>
+                    <button class="btn-role" onclick="seleccionarRol('Recepcionista')">Recepcionista</button>
+                </div>
+            </div>
+
+            <!-- Verificación de Contraseña de Administrador -->
+            <div id="pasoClaveAdmin" style="display: none;">
+                <h2 style="margin-top:0; color: #d9534f;">Seguridad Requerida</h2>
+                <p style="color: #555; font-size: 14px;">Para registrar un <strong>Administrador</strong>, debes ingresar la contraseña de autorización del sistema:</p>
+                
+                <div class="form-group">
+                    <label for="claveAdmin">Contraseña de autorización:</label>
+                    <input type="password" id="claveAdmin" placeholder="Ingresa la clave de admin">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-blue" onclick="validarClaveAdmin()">Verificar</button>
+                    <button class="btn-blue" style="background-color: #6c757d;" onclick="volverASeleccion()">Volver</button>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro de Información -->
+            <div id="pasoFormulario" style="display: none;">
+                <div class="badge-selected">Registrando: <span id="lblRolSeleccionado"></span></div>
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" placeholder="Nombre(s)">
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidoP">Apellido Paterno:</label>
+                    <input type="text" id="apellidoP" placeholder="Apellido paterno">
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidoM">Apellido Materno:</label>
+                    <input type="text" id="apellidoM" placeholder="Apellido materno">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Correo Electrónico:</label>
+                    <input type="email" id="email" placeholder="ejemplo@correo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" placeholder="Número telefónico">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-blue" onclick="guardarUsuario()">Registrar</button>
+                    <button class="btn-blue" style="background-color: #6c757d;" onclick="volverASeleccion()">Cambiar Rol</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE REGISTRO DE CITAS -->
+    <div id="modalCita" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModalCita()">&times;</span>
+            <h2 style="margin-top:0;">Agendar Nueva Cita Médica</h2>
+            
+            <form id="formCita" onsubmit="guardarCita(event)">
+                <div class="form-group">
+                    <label for="idPaciente">ID Paciente:</label>
+                    <input type="number" id="idPaciente" required placeholder="Ej. 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="idDoctor">ID Doctor:</label>
+                    <input type="number" id="idDoctor" required placeholder="Ej. 2">
+                </div>
+
+                <div class="form-group">
+                    <label for="idUsuarioCreador">ID Usuario Creador:</label>
+                    <input type="number" id="idUsuarioCreador" required placeholder="Ej. 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaHora">Fecha y Hora:</label>
+                    <input type="datetime-local" id="fechaHora" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="motivo">Motivo de la Consulta:</label>
+                    <textarea id="motivo" rows="3" placeholder="Describe brevemente el síntoma o motivo..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="submit" class="btn-blue">Agendar Cita</button>
+                    <button type="button" class="btn-blue" style="background-color: #6c757d;" onclick="cerrarModalCita()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script>
+        const CLAVE_ADMIN_CORRECTA = "admin123"; 
+        let rolSeleccionadoActual = "";
+
+        // --- GESTIÓN DE MODAL DE USUARIOS ---
+        function abrirModalRegistro() {
+            document.getElementById('modalRegistro').style.display = 'flex';
+            volverASeleccion();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalRegistro').style.display = 'none';
+            limpiarFormulario();
+        }
+
+        function volverASeleccion() {
+            document.getElementById('pasoSeleccionRol').style.display = 'block';
+            document.getElementById('pasoClaveAdmin').style.display = 'none';
+            document.getElementById('pasoFormulario').style.display = 'none';
+            document.getElementById('claveAdmin').value = '';
+        }
+
+        function seleccionarRol(rol) {
+            rolSeleccionadoActual = rol;
+            if (rol === 'Administrador') {
+                document.getElementById('pasoSeleccionRol').style.display = 'none';
+                document.getElementById('pasoClaveAdmin').style.display = 'block';
+                document.getElementById('claveAdmin').focus();
+            } else {
+                mostrarFormulario();
+            }
+        }
+
+        function validarClaveAdmin() {
+            const claveIngresada = document.getElementById('claveAdmin').value;
+            if (claveIngresada === CLAVE_ADMIN_CORRECTA) {
+                mostrarFormulario();
+            } else {
+                alert('Contraseña de autorización incorrecta. Acceso denegado.');
+                document.getElementById('claveAdmin').value = '';
+            }
+        }
+
+        function mostrarFormulario() {
+            document.getElementById('pasoSeleccionRol').style.display = 'none';
+            document.getElementById('pasoClaveAdmin').style.display = 'none';
+            document.getElementById('pasoFormulario').style.display = 'block';
+            document.getElementById('lblRolSeleccionado').innerText = rolSeleccionadoActual;
+        }
+
+        function guardarUsuario() {
+            const usuario = {
+                rol: rolSeleccionadoActual,
+                nombre: document.getElementById('nombre').value,
+                apellidoPaterno: document.getElementById('apellidoP').value,
+                apellidoMaterno: document.getElementById('apellidoM').value,
+                correo: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value
+            };
+
+            if (!usuario.nombre.trim()) {
+                alert('Por favor escribe al menos el nombre.');
+                return;
+            }
+
+            fetch('/api/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(usuario)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al registrar usuario');
+                return response.json();
+            })
+            .then(data => {
+                alert('¡' + rolSeleccionadoActual + ' registrado exitosamente!');
+                cerrarModal();
+                
+                const contenedor = document.getElementById('listaUsuarios');
+                if (contenedor.style.display !== 'none') {
+                    cargarUsuarios();
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error al registrar el usuario');
+            });
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('nombre').value = '';
+            document.getElementById('apellidoP').value = '';
+            document.getElementById('apellidoM').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('telefono').value = '';
+            document.getElementById('claveAdmin').value = '';
+            rolSeleccionadoActual = "";
+        }
+
+        function toggleListaUsuarios() {
+            const contenedor = document.getElementById('listaUsuarios');
+            const boton = document.getElementById('btnToggleLista');
+
+            if (contenedor.style.display === 'block') {
+                contenedor.style.display = 'none';
+                boton.innerText = 'Cargar / Mostrar Lista';
+                boton.style.backgroundColor = '#007bff';
+            } else {
+                cargarUsuarios();
+                contenedor.style.display = 'block';
+                boton.innerText = 'Ocultar Lista';
+                boton.style.backgroundColor = '#6c757d';
+            }
+        }
+
+        function cargarUsuarios() {
+            fetch('/api/usuarios')
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al obtener la lista');
+                    return response.json();
+                })
+                .then(data => {
+                    const contenedor = document.getElementById('listaUsuarios');
+                    if (!data || data.length === 0) {
+                        contenedor.innerHTML = '<p style="margin-top:20px;">No hay usuarios registrados aún.</p>';
+                        return;
+                    }
+                    
+                    const rolesConfig = [
+                        { singular: 'Administrador', plural: 'Administradores' },
+                        { singular: 'Doctor', plural: 'Doctores' },
+                        { singular: 'Paciente', plural: 'Pacientes' },
+                        { singular: 'Recepcionista', plural: 'Recepcionistas' }
+                    ];
+                    
+                    function generarHTMLRol(rolConfig) {
+                        const usuariosFiltrados = data.filter(u => 
+                            u.rol && u.rol.toLowerCase() === rolConfig.singular.toLowerCase()
+                        );
+
+                        let htmlRol = `
+                            <div class="rol-section">
+                                <h3>${rolConfig.plural}</h3>
+                        `;
+
+                        if (usuariosFiltrados.length === 0) {
+                            htmlRol += `<p class="empty-role">No hay ${rolConfig.plural.toLowerCase()} registrados.</p>`;
+                        } else {
+                            htmlRol += '<ul class="rol-list">';
+                            usuariosFiltrados.forEach(u => {
+                                const nombre = u.nombre || '';
+                                const apeP = u.apellidoPaterno || u.apellidoP || u.apellido_paterno || '';
+                                const apeM = u.apellidoMaterno || u.apellidoM || u.apellido_materno || '';
+                                const nombreCompleto = `${nombre} ${apeP} ${apeM}`.trim();
+                                const correo = u.correo || u.email || '';
+                                const textoCorreo = correo ? ` - ${correo}` : '';
+
+                                htmlRol += `<li><strong>${nombreCompleto}</strong>${textoCorreo}</li>`;
+                            });
+                            htmlRol += '</ul>';
+                        }
+
+                        htmlRol += '</div>';
+                        return htmlRol;
+                    }
+
+                    let htmlFinal = '';
+                    rolesConfig.forEach(rol => {
+                        htmlFinal += generarHTMLRol(rol);
+                    });
+
+                    const rolesSingulares = rolesConfig.map(r => r.singular.toLowerCase());
+                    const otrosUsuarios = data.filter(u => 
+                        !u.rol || !rolesSingulares.includes(u.rol.toLowerCase())
+                    );
+
+                    if (otrosUsuarios.length > 0) {
+                        htmlFinal += `
+                            <div class="rol-section">
+                                <h3>Otros / Sin Rol</h3>
+                                <ul class="rol-list">
+                        `;
+                        otrosUsuarios.forEach(u => {
+                            const nombreCompleto = `${u.nombre || ''} ${u.apellidoPaterno || u.apellidoP || ''}`.trim();
+                            const correo = u.correo || u.email || '';
+                            const textoCorreo = correo ? ` - ${correo}` : '';
+                            htmlFinal += `<li><strong>${nombreCompleto}</strong> (${u.rol || 'Sin Rol'})${textoCorreo}</li>`;
+                        });
+                        htmlFinal += '</ul></div>';
+                    }
+
+                    contenedor.innerHTML = htmlFinal;
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('listaUsuarios').innerHTML = '<p style="color: red; margin-top:20px;">Error al conectar con el servidor.</p>';
+                });
+        }
+
+        // --- GESTIÓN DE CITAS MÉDICAS ---
+        function abrirModalCita() {
+            document.getElementById('modalCita').style.display = 'flex';
+        }
+
+        function cerrarModalCita() {
+            document.getElementById('modalCita').style.display = 'none';
+            document.getElementById('formCita').reset();
+        }
+
+        function guardarCita(event) {
+            event.preventDefault();
+
+            const citaData = {
+                idPaciente: parseInt(document.getElementById('idPaciente').value),
+                idDoctor: parseInt(document.getElementById('idDoctor').value),
+                idUsuarioCreador: parseInt(document.getElementById('idUsuarioCreador').value),
+                fechaHora: document.getElementById('fechaHora').value,
+                motivo: document.getElementById('motivo').value,
+                estado: 'PROGRAMADA'
+            };
+
+            fetch('/api/citas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(citaData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al agendar la cita');
+                return response.json();
+            })
+            .then(data => {
+                alert('¡Cita agendada exitosamente!');
+                cerrarModalCita();
+
+                // Si la lista de citas está abierta, refrescarla
+                const contenedor = document.getElementById('listaCitas');
+                if (contenedor.style.display !== 'none') {
+                    cargarCitas();
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error al conectar con el servidor para agendar la cita.');
+            });
+        }
+
+        function toggleListaCitas() {
+            const contenedor = document.getElementById('listaCitas');
+            const boton = document.getElementById('btnToggleCitas');
+
+            if (contenedor.style.display === 'grid') {
+                contenedor.style.display = 'none';
+                boton.innerText = 'Cargar / Mostrar Citas';
+                boton.style.backgroundColor = '#007bff';
+            } else {
+                cargarCitas();
+                contenedor.style.display = 'grid';
+                boton.innerText = 'Ocultar Citas';
+                boton.style.backgroundColor = '#6c757d';
+            }
+        }
+
+        function cargarCitas() {
+            fetch('/api/citas')
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al obtener citas');
+                    return response.json();
+                })
+                .then(citas => {
+                    const contenedor = document.getElementById('listaCitas');
+                    contenedor.innerHTML = '';
+
+                    if (!citas || citas.length === 0) {
+                        contenedor.innerHTML = '<p style="margin-top:10px; color:#666; font-style:italic;">No hay citas agendadas aún.</p>';
+                        return;
+                    }
+
+                    citas.forEach(cita => {
+                        const fechaFormateada = cita.fechaHora ? new Date(cita.fechaHora).toLocaleString('es-ES') : 'Sin fecha';
+                        contenedor.innerHTML += `
+                            <div class="card-cita">
+                                <span class="badge-cita">${cita.estado || 'PROGRAMADA'}</span>
+                                <strong>Cita #${cita.idCita || cita.id}</strong><br>
+                                <small><strong>Paciente ID:</strong> ${cita.idPaciente}</small><br>
+                                <small><strong>Doctor ID:</strong> ${cita.idDoctor}</small><br>
+                                <small><strong>Fecha:</strong> ${fechaFormateada}</small>
+                                ${cita.motivo ? `<br><small><strong>Motivo:</strong> ${cita.motivo}</small>` : ''}
+                            </div>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('listaCitas').innerHTML = '<p style="color: red; margin-top:10px;">Error al cargar la lista de citas.</p>';
+                });
+        }
+    </script>
+</body>
+</html>
